@@ -1,0 +1,29 @@
+:root {
+  --calendar-bg: #f8fafc;
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --card-hover-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --status-border-width: 4px;
+}
+
+.calendar-day-cell {
+  min-height: 140px;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-day-cell:hover {
+  background-color: var(--chakra-colors-bg-subtle);
+}
+
+.post-card-preview {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--chakra-radii-md) var(--chakra-radii-md) 0 0;
+}
+
+.status-indicator {
+  width: var(--status-border-width);
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
