@@ -2,16 +2,29 @@ import { useState, useEffect } from 'react';
 import { MONDAY_BOARDS, fetchMondayGraphQL } from '../api/mondayApi';
 
 export function useConfig() {
+    const envToken = import.meta.env.VITE_MONDAY_API_TOKEN || '';
+
     const [config, setConfig] = useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        const urlBoardId = params.get('client');
+
+        if (urlBoardId && envToken) {
+            return { apiToken: envToken, boardId: urlBoardId };
+        }
+
         const saved = localStorage.getItem('calendario-editorial-config');
         if (saved) {
             try {
-                return JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+                return {
+                    apiToken: envToken || parsed.apiToken,
+                    boardId: parsed.boardId || MONDAY_BOARDS[0].id
+                };
             } catch (e) {
                 console.error('Failed to parse config');
             }
         }
-        return { apiToken: '', boardId: MONDAY_BOARDS[0].id };
+        return { apiToken: envToken, boardId: MONDAY_BOARDS[0].id };
     });
 
     const [isValidating, setIsValidating] = useState(false);

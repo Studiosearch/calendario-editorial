@@ -26,7 +26,7 @@ export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCre
     const getPostsForDay = (day) =>
         posts.filter(
             (p) =>
-                p.dataPostagem &&
+                p.dataPostagem instanceof Date &&
                 p.dataPostagem.getDate() === day &&
                 p.dataPostagem.getMonth() === currentDate.getMonth() &&
                 p.dataPostagem.getFullYear() === currentDate.getFullYear()
@@ -85,6 +85,22 @@ export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCre
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <select
+                        value={currentDate.getMonth()}
+                        onChange={(e) => setCurrentDate(new Date(currentDate.getFullYear(), parseInt(e.target.value), 1))}
+                        style={{
+                            padding: '6px 12px', border: '1px solid #e2e8f0', borderRadius: '6px',
+                            background: 'white', fontSize: '13px', fontWeight: 600, color: '#4a5568',
+                            cursor: 'pointer', outline: 'none'
+                        }}
+                    >
+                        {Array.from({ length: 12 }).map((_, i) => (
+                            <option key={i} value={i}>
+                                {new Date(2000, i, 1).toLocaleString('pt-BR', { month: 'short' }).toUpperCase()}
+                            </option>
+                        ))}
+                    </select>
+
                     <button
                         onClick={() => { setCurrentDate(new Date()); setMobileOffset(0); }}
                         style={{

@@ -24,7 +24,7 @@ export default function App() {
 
     const {
         posts, metadata, loading, error,
-        updatePost, uploadPostFile, deletePostFile, createPost, requestPostRevision,
+        updatePost, uploadPostFile, deletePostFile, reorderPostFiles, createPost, deletePost, requestPostRevision, colMap,
     } = usePosts(apiToken, boardId);
 
     const [selectedPost, setSelectedPost] = useState(null);
@@ -51,7 +51,7 @@ export default function App() {
     );
 
     const handleForwardToClient = () => {
-        const shareUrl = `${window.location.origin}${window.location.pathname}#approval`;
+        const shareUrl = `${window.location.origin}${window.location.pathname}?client=${boardId}#approval`;
         navigator.clipboard.writeText(shareUrl).then(() => {
             setIsInternalPreview(true);
             window.location.hash = 'approval';
@@ -236,6 +236,7 @@ export default function App() {
                     onUpdate={updatePost}
                     onUpload={uploadPostFile}
                     onDeleteFile={deletePostFile}
+                    onReorder={reorderPostFiles}
                     onDelete={deletePost}
                 />
                 <ProfileView
@@ -243,6 +244,8 @@ export default function App() {
                     metadata={metadata}
                     open={profileOpen}
                     onClose={() => setProfileOpen(false)}
+                    onApprove={(id, s) => updatePost(id, { status: s })}
+                    onRevision={requestPostRevision}
                 />
                 <CreatePostModal
                     open={isCreateOpen}

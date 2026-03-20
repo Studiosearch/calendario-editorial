@@ -10,13 +10,20 @@ const identifyColumns = (boardColumns) => {
         const title = (c.title || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const type = c.type;
 
-        if (title.includes('data') || type === 'date') colMap.date = c.id;
+        // Priority checks
+        if (type === 'date' && (title.includes('postagem') || title.includes('publicacao'))) {
+            colMap.date = c.id;
+        } else if (!colMap.date && (title.includes('data') || type === 'date')) {
+            colMap.date = c.id;
+        }
+
         else if (title === 'status' || title.includes('status do post') || title.includes('aprovacao')) colMap.status = c.id;
         else if (title.includes('legenda') || title.includes('copy') || title.includes('texto final')) colMap.legenda = c.id;
         else if (title.includes('roteiro') || title.includes('script') || title.includes('video')) colMap.roteiro = c.id;
         else if (title.includes('plataforma') || title.includes('rede') || title.includes('midia')) colMap.plataformas = c.id;
         else if (title.includes('tipo') || title.includes('formato') || title.includes('linha editorial')) colMap.tipoDePost = c.id;
         else if (title.includes('desenvolvimento') || title.includes('etapa') || title.includes('fase') || title.includes('status da arte')) colMap.desenvolvimento = c.id;
+        else if (title.includes('revisao') || title.includes('alteracao') || title.includes('feedback')) colMap.revisao = c.id;
         else if (title.includes('arquivo') || title.includes('arte') || title.includes('postagem') || type === 'file') colMap.postagem = c.id;
     }
 
@@ -32,6 +39,7 @@ export function usePosts(apiToken, boardId) {
     const [error, setError] = useState(null);
     const [metadata, setMetadata] = useState({ boardName: 'Carregando...' });
     const [colMap, setColMap] = useState({});
+    const [rawColumns, setRawColumns] = useState([]);
 
     // Fetch initial data via API
     useEffect(() => {
@@ -79,7 +87,10 @@ export function usePosts(apiToken, boardId) {
                 if (!isBackground) setMetadata({ boardName: board.name });
 
                 const cols = identifyColumns(board.columns);
-                if (!isBackground) setColMap(cols);
+                if (!isBackground) {
+                    setColMap(cols);
+                    setRawColumns(board.columns);
+                }
 
                 if (!isBackground) {
                     // DEBUG LOG: Se precisar checar no console os IDs das colunas
@@ -91,6 +102,7 @@ export function usePosts(apiToken, boardId) {
                     const post = {
                         id: item.id,
                         name: item.name,
+                        _raw: item.column_values,
                         legenda: '',
                         roteiro: '',
                         status: '',
@@ -134,8 +146,20 @@ export function usePosts(apiToken, boardId) {
                             }
                         } else if (cv.id === cols.postagem) {
                             if (Array.isArray(val)) {
-                                // val já vem do parseColumnValue formatado com id, name, url e type usando a API de assets
                                 post.postagem = val;
+                                try {
+                                    const cached = localStorage.getItem(`post_img_order_${item.id}`);
+                                    if (cached) {
+                                        const orderIds = JSON.parse(cached);
+                                        post.postagem.sort((a, b) => {
+                                            let idxA = orderIds.indexOf(a.id);
+                                            let idxB = orderIds.indexOf(b.id);
+                                            if (idxA === -1) idxA = 999;
+                                            if (idxB === -1) idxB = 999;
+                                            return idxA - idxB;
+                                        });
+                                    }
+                                } catch (e) { }
                             }
                         }
                     });
@@ -145,7 +169,7 @@ export function usePosts(apiToken, boardId) {
 
                 setPosts(mappedPosts);
             } catch (err) {
-                console.error(err);
+                console.error("DEBUG MONDAY FETCH ERROR:", err);
                 if (!isBackground) setError('Erro ao carregar os dados do Monday.com: ' + err.message);
             } finally {
                 if (!isBackground) setLoading(false);
@@ -174,11 +198,15 @@ export function usePosts(apiToken, boardId) {
         try {
             const columnValues = {};
 
-            if (updates.status !== undefined && colMap.status) columnValues[colMap.status] = updates.status;
+            if (updates.status !== undefined && colMap.status) columnValues[colMap.status] = { label: updates.status };
             if (updates.legenda !== undefined && colMap.legenda) columnValues[colMap.legenda] = updates.legenda;
             if (updates.roteiro !== undefined && colMap.roteiro) columnValues[colMap.roteiro] = updates.roteiro;
-            if (updates.tipoDePost !== undefined && colMap.tipoDePost) columnValues[colMap.tipoDePost] = updates.tipoDePost;
-            if (updates.desenvolvimento !== undefined && colMap.desenvolvimento) columnValues[colMap.desenvolvimento] = updates.desenvolvimento;
+            if (updates.tipoDePost !== undefined && colMap.tipoDePost) columnValues[colMap.tipoDePost] = { label: updates.tipoDePost };
+            if (updates.desenvolvimento !== undefined && colMap.desenvolvimento) columnValues[colMap.desenvolvimento] = { label: updates.desenvolvimento };
+            if (updates.alteracoesSolicitadas !== undefined) {
+                if (colMap.revisao) columnValues[colMap.revisao] = updates.alteracoesSolicitadas;
+                else if (colMap.roteiro) columnValues[colMap.roteiro] = updates.alteracoesSolicitadas;
+            }
             if (updates.dataPostagem !== undefined && colMap.date) {
                 if (!updates.dataPostagem) {
                     columnValues[colMap.date] = null;
@@ -223,7 +251,8 @@ export function usePosts(apiToken, boardId) {
             }
         } catch (err) {
             console.error('Update failed on server', err);
-            setError('Erro ao salvar no Monday.com. As alterações foram feitas apenas localmente.');
+            alert('ERRO DO MONDAY.COM: ' + err.message);
+            setError('Erro ao salvar no Monday.com. As alterações foram feitas apenas localmente. ' + err.message);
         }
     }, [apiToken, boardId, colMap]);
 
@@ -320,6 +349,17 @@ export function usePosts(apiToken, boardId) {
         updatePost(id, { postagem: [] }); // Simplificado para deletar tudo (monday mutation tem outro workflow)
     }, [updatePost]);
 
+    const reorderPostFiles = useCallback((id, newOrderArray) => {
+        setPosts(prev => prev.map(p => {
+            if (p.id !== id) return p;
+            return { ...p, postagem: newOrderArray };
+        }));
+        try {
+            const orderIds = newOrderArray.map(f => f.id);
+            localStorage.setItem(`post_img_order_${id}`, JSON.stringify(orderIds));
+        } catch (e) { }
+    }, []);
+
     const deletePost = useCallback(async (id) => {
         // Optimistic UI update
         const postToRemove = posts.find(p => p.id === id);
@@ -338,7 +378,9 @@ export function usePosts(apiToken, boardId) {
     }, [apiToken, posts]);
 
     const requestPostRevision = useCallback((id, categories, text) => {
-        const obs = `Revisão solicitada (${categories.join(', ')}): ${text}`;
+        const obs = (categories.length === 1 && categories[0] === 'Feedback Geral')
+            ? text
+            : `Revisão (${categories.join(', ')}): ${text}`;
         updatePost(id, {
             status: 'Revisão',
             alteracoesSolicitadas: obs // Salva numa coluna extra se existir, ou no roteiro se quiser mapear
@@ -353,8 +395,10 @@ export function usePosts(apiToken, boardId) {
         updatePost,
         uploadPostFile,
         deletePostFile,
+        reorderPostFiles,
         createPost,
         deletePost,
         requestPostRevision,
+        colMap,
     };
 }

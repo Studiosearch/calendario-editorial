@@ -5,7 +5,7 @@ import PostDetailCreative from './PostDetailCreative';
 import PostDetailPlanning from './PostDetailPlanning';
 import PostDetailFooter from './PostDetailFooter';
 
-export default function PostDetail({ item, open, onClose, onUpdate, onUpload, onDeleteFile, onDelete }) {
+export default function PostDetail({ item, open, onClose, onUpdate, onUpload, onDeleteFile, onReorder, onDelete }) {
     const [draftLegenda, setDraftLegenda] = useState('');
     const [draftRoteiro, setDraftRoteiro] = useState('');
     const [draftStatus, setDraftStatus] = useState('');
@@ -89,7 +89,7 @@ export default function PostDetail({ item, open, onClose, onUpdate, onUpload, on
                                     padding: '6px 14px', borderRadius: '999px',
                                     border: '1px solid #e2e8f0', background: 'white',
                                     fontSize: '13px', fontWeight: 600, cursor: 'pointer',
-                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)', color: '#1a202c'
                                 }}
                             >
                                 {STATUS_OPTIONS.map((s) => (
@@ -135,6 +135,7 @@ export default function PostDetail({ item, open, onClose, onUpdate, onUpload, on
                             onLegendaChange={setDraftLegenda}
                             onUpload={onUpload}
                             onDeleteFile={(fileId) => onDeleteFile(item.id, fileId)}
+                            onReorder={(newArr) => onReorder(item.id, newArr)}
                         />
                         <PostDetailPlanning
                             item={item}

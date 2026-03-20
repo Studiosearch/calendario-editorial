@@ -4,7 +4,7 @@ export default function FilePreview({ file, height = '100%', objectFit = 'cover'
     if (!file) return null;
 
     const url = file.url || '';
-    const isVideo = file.type?.startsWith('video/') || url.match(/\.(mp4|webm|mov)$/i);
+    const isVideo = file.type?.startsWith('video/') || url.match(/\.(mp4|webm|mov)$/i) || file.name?.match(/\.(mp4|mov|webm)$/i);
 
     const containerStyle = {
         width: '100%',
@@ -53,6 +53,7 @@ export default function FilePreview({ file, height = '100%', objectFit = 'cover'
                 alt={file.name || 'Preview'}
                 style={{ width: '100%', height: '100%', objectFit }}
                 loading="lazy"
+                draggable={false}
             />
         </div>
     );

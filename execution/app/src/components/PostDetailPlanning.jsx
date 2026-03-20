@@ -18,7 +18,7 @@ export default function PostDetailPlanning({
     const selectStyle = {
         width: '100%', padding: '8px 12px',
         border: '1px solid #e2e8f0', borderRadius: '6px',
-        background: 'white', fontSize: '13px', fontFamily: 'inherit',
+        background: 'white', fontSize: '13px', fontFamily: 'inherit', color: '#1a202c',
         cursor: 'pointer', outline: 'none',
     };
 
@@ -82,7 +82,7 @@ export default function PostDetailPlanning({
                     style={{
                         width: '100%', minHeight: '100px', padding: '12px',
                         border: '1px solid #e2e8f0', borderRadius: '12px',
-                        background: '#f7fafc', fontSize: '13px', fontFamily: 'inherit',
+                        background: '#f7fafc', fontSize: '13px', fontFamily: 'inherit', color: '#1a202c',
                         resize: 'vertical', outline: 'none',
                     }}
                     onFocus={(e) => e.target.style.borderColor = '#3182ce'}
@@ -105,7 +105,7 @@ export default function PostDetailPlanning({
                                 onChange={() => handleToggle(p.value)}
                                 style={{ accentColor: '#3182ce' }}
                             />
-                            {p.label}
+                            <span style={{ color: '#1a202c' }}>{p.label}</span>
                         </label>
                     ))}
                 </div>

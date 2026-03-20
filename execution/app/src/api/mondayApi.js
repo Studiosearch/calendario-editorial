@@ -78,10 +78,12 @@ export async function deleteMondayItem(itemId, token) {
 
 // Extrai o valor do texto simples da coluna, lidando com diferentes tipos no Monday
 export function parseColumnValue(column, itemAssets = []) {
-    if (!column || !column.value) return '';
+    if (!column) return '';
+    if (!column.value && column.text) return column.text || '';
+
     try {
-        const val = typeof column.value === 'string' ? JSON.parse(column.value) : column.value;
-        if (!val) return '';
+        const val = column.value && typeof column.value === 'string' ? JSON.parse(column.value) : column.value;
+        if (!val) return column.text || '';
         if (typeof val === 'string') return val;
         if (val.text) return val.text;
         if (column.type === 'color' && val.index !== undefined) {
@@ -93,11 +95,13 @@ export function parseColumnValue(column, itemAssets = []) {
                 // Busca na lista de assets o public_url correspondente ao id ou assetId
                 const assetIdStr = (f.assetId || f.id || '').toString();
                 const assetInfo = itemAssets.find(a => a.id === assetIdStr);
+                const ext = assetInfo?.file_extension?.toLowerCase();
+                const isVideo = ext && ['mp4', 'mov', 'webm', 'avi', 'mkv', 'gif'].includes(ext);
                 return {
                     id: assetIdStr,
                     name: f.name,
                     url: assetInfo?.public_url || '',
-                    type: assetInfo?.file_extension ? `image/${assetInfo.file_extension}` : 'image/jpeg'
+                    type: ext ? (isVideo ? `video/${ext}` : `image/${ext}`) : 'image/jpeg'
                 };
             });
         }

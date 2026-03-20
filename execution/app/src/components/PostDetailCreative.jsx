@@ -2,8 +2,29 @@ import React, { useRef, useState } from 'react';
 import { Palette, MessageSquareText, Upload, X } from 'lucide-react';
 import FilePreview from './FilePreview';
 
-export default function PostDetailCreative({ item, legenda, onLegendaChange, onUpload, onDeleteFile }) {
+export default function PostDetailCreative({ item, legenda, onLegendaChange, onUpload, onDeleteFile, onReorder }) {
     const [isUploading, setIsUploading] = useState(false);
+    const [draggedIdx, setDraggedIdx] = useState(null);
+
+    const handleDragStart = (e, index) => {
+        setDraggedIdx(index);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', index.toString());
+    };
+
+    const handleDrop = (e, targetIdx) => {
+        e.preventDefault();
+        if (draggedIdx === null || draggedIdx === targetIdx) return;
+
+        const newArr = [...item.postagem];
+        const draggedItem = newArr[draggedIdx];
+        newArr.splice(draggedIdx, 1);
+        newArr.splice(targetIdx, 0, draggedItem);
+
+        if (onReorder) onReorder(newArr);
+        setDraggedIdx(null);
+    };
+
     const fileRef = useRef(null);
 
     const handleUpload = async (e) => {
@@ -50,8 +71,20 @@ export default function PostDetailCreative({ item, legenda, onLegendaChange, onU
                             gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
                             gap: '12px', padding: '12px',
                         }}>
-                            {item.postagem.map((f) => (
-                                <div key={f.id} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden' }}>
+                            {item.postagem.map((f, idx) => (
+                                <div key={f.id}
+                                    draggable={true}
+                                    onDragStart={(e) => handleDragStart(e, idx)}
+                                    onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }}
+                                    onDragEnter={(e) => e.preventDefault()}
+                                    onDrop={(e) => handleDrop(e, idx)}
+                                    onDragEnd={() => setDraggedIdx(null)}
+                                    style={{
+                                        position: 'relative', borderRadius: '8px', overflow: 'hidden',
+                                        cursor: 'grab', opacity: draggedIdx === idx ? 0.4 : 1,
+                                        transform: draggedIdx === idx ? 'scale(0.95)' : 'none',
+                                        transition: 'transform 0.2s, opacity 0.2s',
+                                    }}>
                                     <FilePreview file={f} height="140px" objectFit="cover" />
                                     <button
                                         onClick={() => onDeleteFile(f.id)}
@@ -96,7 +129,7 @@ export default function PostDetailCreative({ item, legenda, onLegendaChange, onU
                     style={{
                         width: '100%', minHeight: '160px', padding: '16px',
                         border: '1px solid #e2e8f0', borderRadius: '12px',
-                        background: 'white', fontSize: '14px', fontFamily: 'inherit',
+                        background: 'white', fontSize: '14px', fontFamily: 'inherit', color: '#1a202c',
                         resize: 'vertical', outline: 'none', transition: 'border-color 0.2s',
                     }}
                     onFocus={(e) => e.target.style.borderColor = '#3182ce'}
