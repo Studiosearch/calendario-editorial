@@ -53,6 +53,11 @@ export default function App() {
     const handleForwardToClient = () => {
         const shareUrl = `${window.location.origin}${window.location.pathname}?client=${boardId}#approval`;
         navigator.clipboard.writeText(shareUrl).then(() => {
+            alert('✅ Link copiado na área de transferência! Você já pode dar um Ctrl+V (ou colar) para enviar ao seu cliente.');
+            setIsInternalPreview(true);
+            window.location.hash = 'approval';
+        }).catch(() => {
+            alert('O link de aprovação é: ' + shareUrl);
             setIsInternalPreview(true);
             window.location.hash = 'approval';
         });
