@@ -16,7 +16,6 @@ function useIsMobile() {
 
 export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCreateClick }) {
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [mobileOffset, setMobileOffset] = useState(0);
     const isMobile = useIsMobile();
 
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
@@ -34,7 +33,7 @@ export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCre
 
     const gridDays = Array.from({ length: 42 }).map((_, i) => i - startDay + 1);
     const allDays = gridDays.filter((d) => d > 0 && d <= daysInMonth);
-    const visibleDays = isMobile ? allDays.slice(mobileOffset, mobileOffset + 3) : gridDays;
+    const visibleDays = isMobile ? allDays : gridDays;
 
     const today = new Date();
 
@@ -102,7 +101,7 @@ export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCre
                     </select>
 
                     <button
-                        onClick={() => { setCurrentDate(new Date()); setMobileOffset(0); }}
+                        onClick={() => setCurrentDate(new Date())}
                         style={{
                             padding: '6px 12px', border: 'none', background: 'transparent',
                             fontSize: '13px', fontWeight: 600, cursor: 'pointer', color: '#4a5568',
@@ -114,11 +113,7 @@ export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCre
                         Hoje
                     </button>
                     <button
-                        onClick={() =>
-                            isMobile
-                                ? setMobileOffset(Math.max(0, mobileOffset - 3))
-                                : setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
-                        }
+                        onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))}
                         style={{
                             width: '32px', height: '32px', borderRadius: '50%',
                             border: 'none', background: '#edf2f7', cursor: 'pointer',
@@ -131,11 +126,7 @@ export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCre
                         <ChevronLeft size={16} />
                     </button>
                     <button
-                        onClick={() =>
-                            isMobile
-                                ? setMobileOffset(Math.min(allDays.length - 3, mobileOffset + 3))
-                                : setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
-                        }
+                        onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))}
                         style={{
                             width: '32px', height: '32px', borderRadius: '50%',
                             border: 'none', background: '#edf2f7', cursor: 'pointer',
@@ -153,7 +144,7 @@ export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCre
             {/* Days Grid */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(7, 1fr)',
+                gridTemplateColumns: isMobile ? '1fr' : 'repeat(7, 1fr)',
                 background: '#e2e8f0',
                 gap: '1px',
             }}>
