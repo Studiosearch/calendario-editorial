@@ -5,8 +5,18 @@ export function useConfig() {
     const envToken = import.meta.env.VITE_MONDAY_API_TOKEN || '';
 
     const [config, setConfig] = useState(() => {
-        const params = new URLSearchParams(window.location.search);
-        const urlBoardId = params.get('client');
+        const pathSlug = window.location.pathname.replace(/^\/+/, '').toLowerCase();
+        let urlBoardId = null;
+        
+        if (pathSlug) {
+            const boardInfo = MONDAY_BOARDS.find(b => b.slug === pathSlug);
+            if (boardInfo) urlBoardId = boardInfo.id;
+        }
+        
+        if (!urlBoardId) {
+            const params = new URLSearchParams(window.location.search);
+            urlBoardId = params.get('client');
+        }
 
         if (urlBoardId && envToken) {
             return { apiToken: envToken, boardId: urlBoardId };

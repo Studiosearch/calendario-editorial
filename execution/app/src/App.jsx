@@ -51,7 +51,9 @@ export default function App() {
     );
 
     const handleForwardToClient = () => {
-        const shareUrl = `${window.location.origin}${window.location.pathname}?client=${boardId}#approval`;
+        const currentBoard = MONDAY_BOARDS.find(b => b.id === boardId);
+        const slug = currentBoard ? currentBoard.slug : '';
+        const shareUrl = `${window.location.origin}/${slug}#approval`;
         
         const newWindow = window.open(shareUrl, '_blank');
         if (!newWindow) {
@@ -59,7 +61,7 @@ export default function App() {
         }
         
         navigator.clipboard.writeText(shareUrl).then(() => {
-            alert('✅ O Link também foi copiado pro seu Mouse! Você já pode colar (Ctrl+V) no WhatsApp do cliente.');
+            alert('✅ O Link ' + shareUrl + ' foi copiado pro seu Mouse! Você já pode colar (Ctrl+V) no WhatsApp do cliente.');
         }).catch(() => {
             console.log('Link:', shareUrl);
         });

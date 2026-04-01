@@ -1,8 +1,8 @@
 export const MONDAY_BOARDS = [
-    { id: '18022978435', name: 'Clinica Integrare' },
-    { id: '18191149018', name: 'Ecoa Fonaudiologia' },
-    { id: '18368989071', name: 'Singrafs' },
-    { id: '10063228355', name: 'Solucione Services' },
+    { id: '18022978435', name: 'Clinica Integrare', slug: 'clinicaintegrare' },
+    { id: '18191149018', name: 'Ecoa Fonaudiologia', slug: 'ecoafonoaudiologia' },
+    { id: '18368989071', name: 'Singrafs', slug: 'singrafs' },
+    { id: '10063228355', name: 'Solucione Services', slug: 'solucioneservices' },
 ];
 
 export async function fetchMondayGraphQL(query, variables, token) {
