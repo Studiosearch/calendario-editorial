@@ -130,7 +130,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                     top: window.innerWidth >= 768 ? '12px' : '4px',
                                     right: window.innerWidth >= 768 ? '12px' : '4px',
                                 }}>
-                                    {post.status === 'Aprovado pelo cliente' && (
+                                    {post.status === 'Aprovado' && (
                                         <div style={{
                                             background: '#48bb78', padding: window.innerWidth >= 768 ? '6px' : '4px',
                                             borderRadius: '50%', boxShadow: '0 2px 8px rgba(0,0,0,0.2)',

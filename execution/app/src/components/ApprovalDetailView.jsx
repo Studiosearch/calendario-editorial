@@ -11,7 +11,7 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
     const handleApprove = async () => {
         setIsSubmitting(true);
         try {
-            await onApprove(post.id, 'Aprovado pelo cliente');
+            await onApprove(post.id, 'Aprovado');
             onClose();
         } finally {
             setIsSubmitting(false);
@@ -141,14 +141,14 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <button
                                 onClick={handleApprove}
-                                disabled={post.status === 'Aprovado pelo cliente' || isSubmitting}
+                                disabled={post.status === 'Aprovado' || isSubmitting}
                                 style={{
                                     width: '100%',
                                     padding: window.innerWidth >= 768 ? '16px' : '14px',
                                     border: 'none', borderRadius: '12px',
-                                    background: post.status === 'Aprovado pelo cliente' ? '#c6f6d5' : 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+                                    background: post.status === 'Aprovado' ? '#c6f6d5' : 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
                                     color: 'white', fontSize: '16px', fontWeight: 700,
-                                    cursor: post.status === 'Aprovado pelo cliente' ? 'not-allowed' : 'pointer',
+                                    cursor: post.status === 'Aprovado' ? 'not-allowed' : 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                     boxShadow: '0 4px 6px rgba(72,187,120,0.3)',
                                     transition: 'all 0.2s', opacity: isSubmitting ? 0.7 : 1,
@@ -158,13 +158,13 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                             </button>
                             <button
                                 onClick={() => setRevisionOpen(true)}
-                                disabled={post.status === 'Aprovado pelo cliente' || isSubmitting}
+                                disabled={post.status === 'Aprovado' || isSubmitting}
                                 style={{
                                     width: '100%', padding: window.innerWidth >= 768 ? '12px' : '10px',
                                     borderRadius: '12px', border: '2px solid #ecc94b',
                                     background: 'transparent', color: '#d69e2e',
                                     fontSize: '14px', fontWeight: 600,
-                                    cursor: post.status === 'Aprovado pelo cliente' ? 'not-allowed' : 'pointer',
+                                    cursor: post.status === 'Aprovado' ? 'not-allowed' : 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                     transition: 'all 0.2s',
                                 }}

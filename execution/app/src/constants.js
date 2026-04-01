@@ -7,6 +7,8 @@ export const STATUS_COLORS = {
     "Aprovado pelo cliente": "#579bfc",
     "Aprovado": "#579bfc",
     "Em aprovação": "#9cd326",
+    "Em Aprovação Studio": "#9cd326",
+    "Em Aprovação Cliente": "#007eb5",
     "Em produção": "#fdab3d",
     "Revisão": "#ffcb00",
     // Desenvolvimento
@@ -26,8 +28,9 @@ export const STATUS_COLORS = {
 export const STATUS_OPTIONS = [
     { label: "Não iniciado", value: "Não iniciado" },
     { label: "Em produção", value: "Em produção" },
-    { label: "Em aprovação", value: "Em aprovação" },
-    { label: "Aprovado pelo cliente", value: "Aprovado pelo cliente" },
+    { label: "Em Aprovação Cliente", value: "Em Aprovação Cliente" },
+    { label: "Em Aprovação Studio", value: "Em Aprovação Studio" },
+    { label: "Aprovado", value: "Aprovado" },
     { label: "Revisão", value: "Revisão" },
     { label: "Agendado", value: "Agendado" },
     { label: "Agendado MLABS", value: "Agendado MLABS" },
