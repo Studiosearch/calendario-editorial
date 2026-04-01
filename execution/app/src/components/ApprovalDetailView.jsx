@@ -94,7 +94,7 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                                         minWidth: '100%', aspectRatio: '1080 / 1350',
                                         position: 'relative', scrollSnapAlign: 'start',
                                     }}>
-                                        <FilePreview file={file} height="100%" objectFit="contain" disableViewer />
+                                        <FilePreview file={file} height="100%" objectFit="contain" />
                                         {post.postagem.length > 1 && (
                                             <div style={{
                                                 position: 'absolute', top: '16px', right: '16px',
