@@ -124,28 +124,47 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                     </div>
                                 )}
 
-                                {/* Status badge */}
+                                {/* Máscara Escura para Destaque */}
+                                {(post.status === 'Aprovado' || post.status === 'Revisão') && (
+                                    <div style={{
+                                        position: 'absolute', inset: 0,
+                                        background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.7) 100%)',
+                                        zIndex: 5, pointerEvents: 'none'
+                                    }} />
+                                )}
+
+                                {/* Status text label (Botton Left) */}
                                 <div style={{
                                     position: 'absolute',
-                                    top: window.innerWidth >= 768 ? '12px' : '4px',
-                                    right: window.innerWidth >= 768 ? '12px' : '4px',
+                                    bottom: window.innerWidth >= 768 ? '12px' : '8px',
+                                    left: window.innerWidth >= 768 ? '12px' : '8px',
+                                    display: 'flex', gap: '4px',
+                                    zIndex: 10,
                                 }}>
                                     {post.status === 'Aprovado' && (
                                         <div style={{
-                                            background: '#48bb78', padding: window.innerWidth >= 768 ? '6px' : '4px',
-                                            borderRadius: '50%', boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                                            border: '2px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            background: 'rgba(72,187,120,0.95)', padding: '6px 12px',
+                                            borderRadius: '6px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                                            color: 'white', display: 'flex', alignItems: 'center', gap: '6px',
+                                            border: '1px solid #38a169', backdropFilter: 'blur(4px)'
                                         }}>
-                                            <CheckCircle size={statusIconSize} color="white" />
+                                            <CheckCircle size={14} color="white" />
+                                            <span style={{ fontSize: window.innerWidth >= 768 ? '12px' : '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                Aprovado
+                                            </span>
                                         </div>
                                     )}
                                     {post.status === 'Revisão' && (
                                         <div style={{
-                                            background: '#ecc94b', padding: window.innerWidth >= 768 ? '6px' : '4px',
-                                            borderRadius: '50%', boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                                            border: '2px solid white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            background: 'rgba(236,201,75,0.95)', padding: '6px 12px',
+                                            borderRadius: '6px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                                            color: '#744210', display: 'flex', alignItems: 'center', gap: '6px',
+                                            border: '1px solid #d69e2e', backdropFilter: 'blur(4px)'
                                         }}>
-                                            <MessageSquareText size={statusIconSize} color="white" />
+                                            <MessageSquareText size={14} color="#744210" />
+                                            <span style={{ fontSize: window.innerWidth >= 768 ? '12px' : '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                Revisão
+                                            </span>
                                         </div>
                                     )}
                                 </div>
