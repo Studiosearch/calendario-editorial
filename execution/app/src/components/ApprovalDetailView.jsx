@@ -75,12 +75,33 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                     overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
                     border: '1px solid #e2e8f0',
                 }}>
-                    {/* Image */}
-                    <div style={{ aspectRatio: '1080 / 1350', background: '#000', position: 'relative' }}>
-                        {post.postagem?.[0] ? (
-                            <FilePreview file={post.postagem[0]} height="100%" objectFit="contain" />
+                    {/* Images Carousel */}
+                    <div style={{
+                        display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory',
+                        background: '#000', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
+                    }}>
+                        {post.postagem?.length > 0 ? (
+                            post.postagem.map((file, idx) => (
+                                <div key={idx} style={{
+                                    minWidth: '100%', aspectRatio: '1080 / 1350',
+                                    position: 'relative', scrollSnapAlign: 'start',
+                                }}>
+                                    <FilePreview file={file} height="100%" objectFit="contain" disableViewer />
+                                    {post.postagem.length > 1 && (
+                                        <div style={{
+                                            position: 'absolute', top: '16px', right: '16px',
+                                            background: 'rgba(0,0,0,0.6)', color: 'white',
+                                            padding: '4px 10px', borderRadius: '999px',
+                                            fontSize: '11px', fontWeight: 700, backdropFilter: 'blur(4px)',
+                                            pointerEvents: 'none', border: '1px solid rgba(255,255,255,0.2)'
+                                        }}>
+                                            {idx + 1} / {post.postagem.length}
+                                        </div>
+                                    )}
+                                </div>
+                            ))
                         ) : (
-                            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ minWidth: '100%', aspectRatio: '1080 / 1350', borderBottom: '1px solid #2d3748', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <span style={{ color: 'rgba(255,255,255,0.5)' }}>Arte em desenvolvimento</span>
                             </div>
                         )}
