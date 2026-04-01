@@ -18,6 +18,9 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
     const iconSize = useBreakpointValue({ base: 14, md: 20 });
     const statusIconSize = useBreakpointValue({ base: 10, md: 18 });
 
+    const [filterMonth, setFilterMonth] = useState('all');
+    const [visibleMonthLimit, setVisibleMonthLimit] = useState(1);
+
     const sorted = [...posts].sort((a, b) => {
         if (!a.dataPostagem) return 1;
         if (!b.dataPostagem) return -1;
@@ -29,6 +32,24 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
         const url = file.url || '';
         return file.type?.startsWith('video/') || url.match(/\.(mp4|webm|mov)$/i) || file.name?.match(/\.(mp4|mov|webm)$/i);
     };
+
+    // Agrupamento por Mês
+    const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const groupedPosts = {};
+    sorted.forEach(post => {
+        let key = "Sem Data";
+        let sortKey = 0;
+        if (post.dataPostagem) {
+            const y = post.dataPostagem.getFullYear();
+            const m = post.dataPostagem.getMonth();
+            key = `${monthNames[m]} ${y}`;
+            sortKey = y * 100 + m;
+        }
+        if (!groupedPosts[key]) groupedPosts[key] = { key, sortKey, posts: [] };
+        groupedPosts[key].posts.push(post);
+    });
+
+    const monthGroups = Object.values(groupedPosts).sort((a, b) => b.sortKey - a.sortKey);
 
     return (
         <div className="animate-slide-fade-in" style={{ background: '#f7fafc', minHeight: '100vh' }}>
@@ -62,7 +83,29 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                 Aprovação - {metadata.boardName}
                             </span>
                         </div>
-                        <div style={{ width: '140px', display: window.innerWidth >= 768 ? 'block' : 'none' }} />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <select 
+                                value={filterMonth} 
+                                onChange={(e) => {
+                                    setFilterMonth(e.target.value);
+                                    if(e.target.value !== 'all') {
+                                        setVisibleMonthLimit(999);
+                                    } else {
+                                        setVisibleMonthLimit(1);
+                                    }
+                                }}
+                                style={{
+                                    padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0',
+                                    fontSize: '13px', color: '#4a5568', background: '#f7fafc', outline: 'none',
+                                    fontWeight: 600, cursor: 'pointer', boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                }}
+                            >
+                                <option value="all">Filtro de Mês...</option>
+                                {monthGroups.map(g => (
+                                    <option key={g.key} value={g.key}>{g.key}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -87,15 +130,28 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                         </p>
                     </div>
 
-                    {/* Grid */}
-                    <div style={{
-                        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
-                        gap: window.innerWidth >= 768 ? '20px' : '8px',
-                        maxWidth: '935px', margin: '0 auto', width: '100%', padding: '0 4px',
-                    }}>
-                        {sorted.map((post) => (
-                            <div
-                                key={post.id}
+                    {/* Groups */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
+                        {monthGroups
+                            .filter(g => filterMonth === 'all' || g.key === filterMonth)
+                            .slice(0, filterMonth === 'all' ? visibleMonthLimit : 999)
+                            .map((group) => (
+                                <div key={group.key}>
+                                    <h2 style={{ 
+                                        margin: '0 0 24px', fontSize: '1.25rem', fontWeight: 800, 
+                                        color: '#2d3748', textAlign: 'center',
+                                        textTransform: 'uppercase', letterSpacing: '0.05em'
+                                    }}>
+                                        {group.key}
+                                    </h2>
+                                    <div style={{
+                                        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+                                        gap: window.innerWidth >= 768 ? '20px' : '8px',
+                                        maxWidth: '935px', margin: '0 auto', width: '100%', padding: '0 4px',
+                                    }}>
+                                        {group.posts.map((post) => (
+                                            <div
+                                                key={post.id}
                                 onClick={() => onPostClick(post)}
                                 style={{
                                     aspectRatio: '1080 / 1350', background: 'white',
@@ -206,6 +262,28 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                 </div>
                             </div>
                         ))}
+                                    </div>
+                                </div>
+                            ))}
+
+                        {/* Ver Mais Button */}
+                        {filterMonth === 'all' && visibleMonthLimit < monthGroups.length && (
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
+                                <button 
+                                    onClick={() => setVisibleMonthLimit(prev => prev + 1)}
+                                    style={{
+                                        padding: '12px 24px', borderRadius: '8px', border: 'none',
+                                        background: '#319795', color: 'white', fontWeight: 600,
+                                        fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                                        boxShadow: '0 4px 6px rgba(49,151,149,0.3)', transition: 'background 0.2s', width: window.innerWidth >= 768 ? 'auto' : '100%', justifyContent: 'center'
+                                    }}
+                                    onMouseEnter={(e) => e.target.style.background = '#285e61'}
+                                    onMouseLeave={(e) => e.target.style.background = '#319795'}
+                                >
+                                    Ver próximo mês
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
