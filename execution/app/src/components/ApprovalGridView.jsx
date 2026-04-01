@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, ShieldCheck, MessageSquareText, ChevronLeft } from 'lucide-react';
+import { CheckCircle, ShieldCheck, MessageSquareText, ChevronLeft, Images, PlayCircle } from 'lucide-react';
 import FilePreview from './FilePreview';
 
 function useBreakpointValue(values) {
@@ -23,6 +23,12 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
         if (!b.dataPostagem) return -1;
         return b.dataPostagem - a.dataPostagem;
     });
+
+    const isVideoFile = (file) => {
+        if (!file) return false;
+        const url = file.url || '';
+        return file.type?.startsWith('video/') || url.match(/\.(mp4|webm|mov)$/i) || file.name?.match(/\.(mp4|mov|webm)$/i);
+    };
 
     return (
         <div className="animate-slide-fade-in" style={{ background: '#f7fafc', minHeight: '100vh' }}>
@@ -121,6 +127,36 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                         }}>
                                             {post.name}
                                         </span>
+                                    </div>
+                                )}
+
+                                {/* Right Top Media Indicators */}
+                                <div style={{
+                                    position: 'absolute', top: '8px', right: '8px',
+                                    display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 10
+                                }}>
+                                    {post.postagem?.length > 1 && (
+                                        <div style={{
+                                            background: 'rgba(0,0,0,0.6)', padding: '6px',
+                                            borderRadius: '50%', color: 'white', backdropFilter: 'blur(4px)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                        }}>
+                                            <Images size={14} />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Center Play Video Indicator */}
+                                {post.postagem?.[0] && isVideoFile(post.postagem[0]) && (
+                                    <div style={{
+                                        position: 'absolute', top: '50%', left: '50%',
+                                        transform: 'translate(-50%, -50%)',
+                                        background: 'rgba(0,0,0,0.5)', padding: '12px',
+                                        borderRadius: '50%', color: 'white', backdropFilter: 'blur(4px)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        zIndex: 10, pointerEvents: 'none', border: '2px solid rgba(255,255,255,0.7)'
+                                    }}>
+                                        <PlayCircle size={32} />
                                     </div>
                                 )}
 
