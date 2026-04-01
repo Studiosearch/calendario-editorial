@@ -46,10 +46,6 @@ export default function App() {
         return slug && slug !== 'index.html';
     })();
 
-    if (!isAuthenticated && !isApprovalSlug) {
-        return <LoginPage onLogin={() => setIsAuthenticated(true)} />;
-    }
-
     useEffect(() => {
         const handleHash = () => {
             if (window.location.hash === '#approval') setView('approval');
@@ -64,6 +60,11 @@ export default function App() {
         () => (statusFilter === 'all' ? posts : posts.filter((p) => p.status === statusFilter)),
         [posts, statusFilter]
     );
+
+    // Login guard — placed after all hooks to respect React's rules
+    if (!isAuthenticated && !isApprovalSlug) {
+        return <LoginPage onLogin={() => setIsAuthenticated(true)} />;
+    }
 
     const handleForwardToClient = () => {
         const currentBoard = MONDAY_BOARDS.find(b => b.id === boardId);
