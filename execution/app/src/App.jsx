@@ -52,12 +52,16 @@ export default function App() {
 
     const handleForwardToClient = () => {
         const shareUrl = `${window.location.origin}${window.location.pathname}?client=${boardId}#approval`;
+        
+        const newWindow = window.open(shareUrl, '_blank');
+        if (!newWindow) {
+            alert('⚠️ Seu navegador bloqueou a abertura da nova aba (Bloqueador de Pop-ups). Mas o link é: ' + shareUrl);
+        }
+        
         navigator.clipboard.writeText(shareUrl).then(() => {
-            alert('✅ Link copiado! Nós também vamos abrir agora mesmo uma nova guia (aba) pra você ver como ele fica para o cliente.');
-            window.open(shareUrl, '_blank');
+            alert('✅ O Link também foi copiado pro seu Mouse! Você já pode colar (Ctrl+V) no WhatsApp do cliente.');
         }).catch(() => {
-            alert('O link de aprovação é: ' + shareUrl);
-            window.open(shareUrl, '_blank');
+            console.log('Link:', shareUrl);
         });
     };
 
