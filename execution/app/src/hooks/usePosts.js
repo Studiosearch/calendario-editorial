@@ -286,28 +286,31 @@ export function usePosts(apiToken, boardId) {
             }
 
             // A mutation de create exige primeiro criar, as colunas vão junto.
-            // Precisamos do ID do primeiro grupo do board (simplificado aqui).
+            // Precisamos do ID do primeiro grupo do board.
             const queryGroup = `query { boards(ids: [${boardId}]) { groups { id } } }`;
             const groupData = await fetchMondayGraphQL(queryGroup, {}, apiToken);
-            const groupId = groupData?.boards[0]?.groups[0]?.id;
+            const groupId = groupData?.boards[0]?.groups[0]?.id || 'topics';
+
+            const columnValuesJson = JSON.stringify(columnValues);
+            console.log('🚀 create_item payload:', { boardId, groupId, name, columnValuesJson });
 
             const mut = `
-              mutation ($boardId: ID!, $groupId: String!, $itemName: String!, $columnValues: JSON!) {
-                  create_item (board_id: $boardId, group_id: $groupId, item_name: $itemName, column_values: $columnValues) {
+              mutation {
+                  create_item (
+                      board_id: ${boardId},
+                      group_id: "${groupId}",
+                      item_name: "${name.replace(/"/g, '')}",
+                      column_values: ${JSON.stringify(columnValuesJson)}
+                  ) {
                       id
                   }
               }
             `;
 
-            const res = await fetchMondayGraphQL(mut, {
-                boardId,
-                groupId: groupId || "topics",
-                itemName: name,
-                columnValues: JSON.stringify(columnValues)
-            }, apiToken);
-
+            const res = await fetchMondayGraphQL(mut, {}, apiToken);
             const serverId = res.create_item.id;
             setPosts(prev => prev.map(p => p.id === tempId ? { ...p, id: serverId } : p));
+            console.log('✅ Item criado no Monday com ID:', serverId);
         } catch (err) {
             console.error('Create failed', err);
             alert('Erro ao criar tema no Monday: ' + err.message);
