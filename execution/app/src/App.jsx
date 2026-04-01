@@ -11,6 +11,7 @@ import ProfileView from '@components/ProfileView';
 import ApprovalPage from '@components/ApprovalPage';
 import CreatePostModal from '@components/CreatePostModal';
 import SetupScreen from '@components/SetupScreen';
+import LoginPage from '@components/LoginPage';
 
 const ALL_STATUS_OPTIONS = [
     { label: 'Todos os Status', value: 'all' },
@@ -18,6 +19,10 @@ const ALL_STATUS_OPTIONS = [
 ];
 
 export default function App() {
+    const [
+        isAuthenticated, setIsAuthenticated
+    ] = useState(() => sessionStorage.getItem('ss_auth') === 'ok');
+
     const {
         apiToken, boardId, isConfigured, validateToken, changeBoard, clearConfig
     } = useConfig();
@@ -34,6 +39,16 @@ export default function App() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [createDate, setCreateDate] = useState(null);
+
+    // Guard: show login if not authenticated AND this is the root/main URL (not an approval slug)
+    const isApprovalSlug = (() => {
+        const slug = window.location.pathname.replace(/^\//, '');
+        return slug && slug !== 'index.html';
+    })();
+
+    if (!isAuthenticated && !isApprovalSlug) {
+        return <LoginPage onLogin={() => setIsAuthenticated(true)} />;
+    }
 
     useEffect(() => {
         const handleHash = () => {

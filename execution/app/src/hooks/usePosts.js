@@ -277,7 +277,7 @@ export function usePosts(apiToken, boardId) {
 
         try {
             const columnValues = {};
-            if (colMap.status) columnValues[colMap.status] = 'Não iniciado';
+            if (colMap.status) columnValues[colMap.status] = { label: 'Não iniciado' };
             if (initialDate && colMap.date) {
                 const y = initialDate.getFullYear();
                 const m = String(initialDate.getMonth() + 1).padStart(2, '0');
@@ -310,7 +310,8 @@ export function usePosts(apiToken, boardId) {
             setPosts(prev => prev.map(p => p.id === tempId ? { ...p, id: serverId } : p));
         } catch (err) {
             console.error('Create failed', err);
-            setError('Erro ao criar post no Monday.com. Atualize a página.');
+            alert('Erro ao criar tema no Monday: ' + err.message);
+            setError('Erro ao criar post no Monday.com. Atualize a página e tente novamente.');
             // fallback: remove optimistic post se falhar
             setPosts(prev => prev.filter(p => p.id !== tempId));
         }
