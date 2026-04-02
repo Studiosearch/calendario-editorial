@@ -18,6 +18,13 @@ const ALL_STATUS_OPTIONS = [
     ...STATUS_OPTIONS,
 ];
 
+const QUICK_STATUS_FILTERS = [
+    { label: 'Todos', value: 'all' },
+    { label: 'Aprovados', value: 'Aprovado' },
+    { label: 'Agendados', value: 'agendados_group' },
+    { label: 'Aprovação Cliente', value: 'Em Aprovação Cliente' },
+];
+
 export default function App() {
     const [
         isAuthenticated, setIsAuthenticated
@@ -59,7 +66,13 @@ export default function App() {
 
     const filteredPosts = useMemo(() => {
         let result = posts;
-        if (statusFilter !== 'all') result = result.filter(p => p.status === statusFilter);
+        if (statusFilter !== 'all') {
+            if (statusFilter === 'agendados_group') {
+                result = result.filter(p => p.status === 'Agendado' || p.status === 'Agendado MLABS');
+            } else {
+                result = result.filter(p => p.status === statusFilter);
+            }
+        }
         if (clientFilter !== 'all') result = result.filter(p => p.boardId === clientFilter);
         return result;
     }, [posts, statusFilter, clientFilter]);
@@ -243,12 +256,42 @@ export default function App() {
                                     minWidth: '130px',
                                 }}
                             >
-                                {ALL_STATUS_OPTIONS.map((opt) => (
+                                <option value="all">Todos os Status</option>
+                                <option value="agendados_group">Agendados (Todos)</option>
+                                {STATUS_OPTIONS.map((opt) => (
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                                 ))}
                             </select>
                         </div>
                     </div>
+                </div>
+
+                {/* Quick Status Buttons */}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                    {QUICK_STATUS_FILTERS.map(f => {
+                        const isActive = statusFilter === f.value;
+                        return (
+                            <button
+                                key={f.value}
+                                onClick={() => setStatusFilter(isActive ? 'all' : f.value)}
+                                style={{
+                                    padding: '8px 16px',
+                                    borderRadius: '12px',
+                                    fontSize: '13px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    background: isActive ? '#3182ce' : 'white',
+                                    color: isActive ? 'white' : '#4a5568',
+                                    border: '1px solid',
+                                    borderColor: isActive ? '#3182ce' : '#e2e8f0',
+                                    boxShadow: isActive ? '0 4px 6px rgba(49,130,206,0.2)' : '0 1px 2px rgba(0,0,0,0.05)',
+                                }}
+                            >
+                                {f.label}
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* Calendar */}
