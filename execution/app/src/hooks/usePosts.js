@@ -276,46 +276,28 @@ export function usePosts(apiToken, boardId) {
         setPosts(prev => [...prev, newPost]);
 
         try {
-            const columnValues = {};
-            if (colMap.status) columnValues[colMap.status] = { label: 'Não iniciado' };
-            if (initialDate && colMap.date) {
-                const y = initialDate.getFullYear();
-                const m = String(initialDate.getMonth() + 1).padStart(2, '0');
-                const day = String(initialDate.getDate()).padStart(2, '0');
-                columnValues[colMap.date] = `${y}-${m}-${day}`;
-            }
+            // Passo 1: busca o grupo e cria o item apenas com o nome
+            const qGroup = `query { boards(ids: [${boardId}]) { groups { id } } }`;
+            const gData = await fetchMondayGraphQL(qGroup, {}, apiToken);
+            const groupId = gData?.boards[0]?.groups[0]?.id || 'topics';
 
-            // A mutation de create exige primeiro criar, as colunas vão junto.
-            // Precisamos do ID do primeiro grupo do board.
-            const queryGroup = `query { boards(ids: [${boardId}]) { groups { id } } }`;
-            const groupData = await fetchMondayGraphQL(queryGroup, {}, apiToken);
-            const groupId = groupData?.boards[0]?.groups[0]?.id || 'topics';
+            const createMut = `mutation { create_item(board_id: ${boardId}, group_id: "${groupId}", item_name: "${name.replace(/"/g, '')}") { id } }`;
+            const createRes = await fetchMondayGraphQL(createMut, {}, apiToken);
+            const serverId = createRes?.create_item?.id;
 
-            const columnValuesJson = JSON.stringify(columnValues);
-            console.log('🚀 create_item payload:', { boardId, groupId, name, columnValuesJson });
+            if (!serverId) throw new Error('Monday não retornou ID. Tente novamente.');
 
-            const mut = `
-              mutation {
-                  create_item (
-                      board_id: ${boardId},
-                      group_id: "${groupId}",
-                      item_name: "${name.replace(/"/g, '')}",
-                      column_values: ${JSON.stringify(columnValuesJson)}
-                  ) {
-                      id
-                  }
-              }
-            `;
-
-            const res = await fetchMondayGraphQL(mut, {}, apiToken);
-            const serverId = res.create_item.id;
-            setPosts(prev => prev.map(p => p.id === tempId ? { ...p, id: serverId } : p));
             console.log('✅ Item criado no Monday com ID:', serverId);
+            setPosts(prev => prev.map(p => p.id === tempId ? { ...p, id: serverId } : p));
+
+            // Passo 2: atualiza status e data via updatePost (que já funciona)
+            const updates = { status: 'Não iniciado' };
+            if (initialDate) updates.dataPostagem = initialDate;
+            await updatePost(serverId, updates);
         } catch (err) {
             console.error('Create failed', err);
             alert('Erro ao criar tema no Monday: ' + err.message);
             setError('Erro ao criar post no Monday.com. Atualize a página e tente novamente.');
-            // fallback: remove optimistic post se falhar
             setPosts(prev => prev.filter(p => p.id !== tempId));
         }
     }, [apiToken, boardId, colMap]);
