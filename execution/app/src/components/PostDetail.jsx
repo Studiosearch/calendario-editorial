@@ -105,7 +105,13 @@ export default function PostDetail({ item, open, onClose, onUpdate, onUpload, on
                                 {draftStatus}
                             </span>
                         </div>
-                        <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700 }}>{item.name}</h2>
+                        <h2 style={{
+                            margin: 0,
+                            fontSize: '1.4rem',
+                            fontWeight: 700,
+                            color: '#202325',
+                            fontFamily: "'Gastromond', 'Playfair Display', serif"
+                        }}>{item.name}</h2>
                     </div>
                     <button
                         onClick={onClose}

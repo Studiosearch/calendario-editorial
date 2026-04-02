@@ -42,7 +42,13 @@ export default function ProfileView({ posts, metadata, open, onClose, onApprove,
                     display: 'flex', justifyContent: 'center', alignItems: 'center',
                     position: 'relative', background: '#fafbfc',
                 }}>
-                    <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>{metadata.boardName}</h2>
+                    <h2 style={{
+                        margin: 0,
+                        fontSize: '1.2rem',
+                        fontWeight: 700,
+                        color: '#202325',
+                        fontFamily: "'Gastromond', 'Playfair Display', serif"
+                    }}>{metadata.boardName}</h2>
                     <button onClick={onClose} style={{
                         position: 'absolute', right: '16px',
                         width: '32px', height: '32px', border: 'none', background: 'transparent',

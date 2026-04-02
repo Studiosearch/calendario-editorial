@@ -4,20 +4,20 @@ export default function PageHeader({ title, subtitle }) {
     return (
         <div>
             <h1 style={{
+                fontFamily: "'Gastromond', 'Playfair Display', serif",
                 fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)',
                 fontWeight: 800,
                 margin: 0,
                 lineHeight: 1.2,
-                background: 'linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                color: '#202325',
             }}>
                 {title}
             </h1>
             {subtitle && (
                 <p style={{
+                    fontFamily: "'Poppins', sans-serif",
                     fontSize: '0.875rem',
-                    color: '#718096',
+                    color: '#4a5568',
                     margin: '4px 0 0',
                     fontWeight: 500,
                 }}>

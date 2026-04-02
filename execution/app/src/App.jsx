@@ -155,9 +155,8 @@ export default function App() {
         );
     }
 
-    // Main calendar view
     return (
-        <div className="animate-scale-fade-in" style={{ background: '#f7fafc', minHeight: '100vh', paddingBottom: '40px' }}>
+        <div className="animate-scale-fade-in" style={{ background: '#E4E1E6', minHeight: '100vh', paddingBottom: '40px' }}>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             <div style={{ maxWidth: '100%', margin: '0 auto', paddingTop: '24px', paddingLeft: '16px', paddingRight: '16px' }}>
                 {/* Error */}

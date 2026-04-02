@@ -52,7 +52,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
     const monthGroups = Object.values(groupedPosts).sort((a, b) => b.sortKey - a.sortKey);
 
     return (
-        <div className="animate-slide-fade-in" style={{ background: '#f7fafc', minHeight: '100vh' }}>
+        <div className="animate-slide-fade-in" style={{ background: '#E4E1E6', minHeight: '100vh' }}>
             {/* Header */}
             <div style={{
                 background: 'white', borderBottom: '1px solid #e2e8f0',
@@ -118,8 +118,8 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                         <h1 style={{
                             fontSize: 'clamp(1.25rem, 4vw, 2.5rem)', fontWeight: 800,
                             margin: '0 0 8px', lineHeight: 1.15,
-                            background: 'linear-gradient(135deg, #1a365d 0%, #319795 100%)',
-                            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                            color: '#202325',
+                            fontFamily: "'Gastromond', 'Playfair Display', serif"
                         }}>
                             Bem-vindo à sua nova vitrine de conversão.
                         </h1>
@@ -139,8 +139,9 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                 <div key={group.key}>
                                     <h2 style={{ 
                                         margin: '0 0 24px', fontSize: '1.25rem', fontWeight: 800, 
-                                        color: '#2d3748', textAlign: 'center',
-                                        textTransform: 'uppercase', letterSpacing: '0.05em'
+                                        color: '#202325', textAlign: 'center',
+                                        textTransform: 'uppercase', letterSpacing: '0.05em',
+                                        fontFamily: "'Gastromond', 'Playfair Display', serif"
                                     }}>
                                         {group.key}
                                     </h2>

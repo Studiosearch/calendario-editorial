@@ -29,8 +29,9 @@ export default function SetupScreen({ onConnect }) {
     return (
         <div style={{
             minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)',
+            background: '#E4E1E6',
             padding: '24px',
+            fontFamily: "'Poppins', sans-serif"
         }}>
             <div style={{
                 background: 'white', padding: '40px', borderRadius: '16px',
@@ -48,7 +49,13 @@ export default function SetupScreen({ onConnect }) {
                     }}>
                         <Calendar size={32} />
                     </div>
-                    <h1 style={{ margin: '0 0 12px', fontSize: '1.75rem', fontWeight: 800, color: '#1a202c' }}>
+                    <h1 style={{
+                        margin: '0 0 12px',
+                        fontSize: '1.75rem',
+                        fontWeight: 800,
+                        color: '#202325',
+                        fontFamily: "'Gastromond', 'Playfair Display', serif"
+                    }}>
                         Calendário Editorial
                     </h1>
                     <p style={{ margin: 0, color: '#718096', fontSize: '15px', lineHeight: 1.5 }}>

@@ -34,7 +34,7 @@ export default function LoginPage({ onLogin }) {
         <div style={{
             minHeight: '100vh', background: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: "'Inter', -apple-system, sans-serif", padding: '16px'
+            fontFamily: "'Poppins', sans-serif", padding: '16px'
         }}>
             <div style={{
                 width: '100%', maxWidth: '400px',
@@ -55,7 +55,8 @@ export default function LoginPage({ onLogin }) {
                     </div>
                     <h1 style={{
                         margin: '0 0 6px', fontSize: '1.6rem', fontWeight: 800,
-                        color: 'white', letterSpacing: '-0.02em'
+                        color: 'white', letterSpacing: '-0.02em',
+                        fontFamily: "'Gastromond', 'Playfair Display', serif"
                     }}>
                         Studio Search
                     </h1>

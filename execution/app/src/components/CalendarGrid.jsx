@@ -58,9 +58,11 @@ export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCre
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '16px' }}>
                     <h2 style={{
-                        fontSize: isMobile ? '1rem' : '1.5rem',
+                        fontFamily: "'Gastromond', 'Playfair Display', serif",
+                        fontSize: isMobile ? '1.1rem' : '1.5rem',
                         fontWeight: 700,
                         margin: 0,
+                        color: '#202325',
                         textTransform: 'uppercase',
                         letterSpacing: '0.5px',
                     }}>

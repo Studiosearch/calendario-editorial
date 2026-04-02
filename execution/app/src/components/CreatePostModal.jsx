@@ -38,7 +38,13 @@ export default function CreatePostModal({ open, date, onClose, onSubmit }) {
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                     <div>
-                        <h3 style={{ margin: '0 0 8px', fontSize: '1.25rem', fontWeight: 700 }}>
+                        <h3 style={{
+                            margin: '0 0 8px',
+                            fontSize: '1.25rem',
+                            fontWeight: 700,
+                            color: '#202325',
+                            fontFamily: "'Gastromond', 'Playfair Display', serif"
+                        }}>
                             Novo Planejamento
                         </h3>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#718096' }}>
