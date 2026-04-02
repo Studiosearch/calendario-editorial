@@ -57,6 +57,22 @@ export default function PostCard({ item, onClick }) {
             )}
 
             <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {!postFile && item.clientName && (
+                    <span style={{
+                        fontSize: '8px',
+                        fontWeight: 800,
+                        color: '#4a5568',
+                        background: '#edf2f7',
+                        padding: '1px 5px',
+                        borderRadius: '4px',
+                        alignSelf: 'flex-start',
+                        marginBottom: '2px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.3px',
+                    }}>
+                        {item.clientName}
+                    </span>
+                )}
                 <span style={{
                     fontSize: '9px',
                     fontWeight: 700,
