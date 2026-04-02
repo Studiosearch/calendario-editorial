@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Filter, Send, Settings, LogOut } from 'lucide-react';
+import { Filter, Send, Users, LogOut } from 'lucide-react';
 import PageHeader from '@components/PageHeader';
-import { usePosts } from '@hooks/usePosts';
+import { useAllPosts } from '@hooks/useAllPosts';
 import { useConfig } from '@hooks/useConfig';
 import { MONDAY_BOARDS } from './api/mondayApi';
 import { STATUS_OPTIONS } from './constants';
@@ -29,14 +29,15 @@ export default function App() {
 
     const {
         posts, metadata, loading, error,
-        updatePost, uploadPostFile, deletePostFile, reorderPostFiles, createPost, deletePost, requestPostRevision, colMap,
-    } = usePosts(apiToken, boardId);
+        updatePost, uploadPostFile, deletePostFile, reorderPostFiles, createPost, deletePost, requestPostRevision,
+    } = useAllPosts(apiToken);
 
     const [selectedPost, setSelectedPost] = useState(null);
     const [profileOpen, setProfileOpen] = useState(false);
     const [view, setView] = useState('calendar');
     const [isInternalPreview, setIsInternalPreview] = useState(false);
     const [statusFilter, setStatusFilter] = useState('all');
+    const [clientFilter, setClientFilter] = useState('all');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [createDate, setCreateDate] = useState(null);
 
@@ -56,10 +57,12 @@ export default function App() {
         return () => window.removeEventListener('hashchange', handleHash);
     }, []);
 
-    const filteredPosts = useMemo(
-        () => (statusFilter === 'all' ? posts : posts.filter((p) => p.status === statusFilter)),
-        [posts, statusFilter]
-    );
+    const filteredPosts = useMemo(() => {
+        let result = posts;
+        if (statusFilter !== 'all') result = result.filter(p => p.status === statusFilter);
+        if (clientFilter !== 'all') result = result.filter(p => p.boardId === clientFilter);
+        return result;
+    }, [posts, statusFilter, clientFilter]);
 
     // Login guard — placed after all hooks to respect React's rules
     if (!isAuthenticated && !isApprovalSlug) {
@@ -67,15 +70,17 @@ export default function App() {
     }
 
     const handleForwardToClient = () => {
-        const currentBoard = MONDAY_BOARDS.find(b => b.id === boardId);
+        // Encaminha o board filtrado ou o primeiro disponível
+        const targetBoardId = clientFilter !== 'all' ? clientFilter : (boardId || MONDAY_BOARDS[0]?.id);
+        const currentBoard = MONDAY_BOARDS.find(b => b.id === targetBoardId);
         const slug = currentBoard ? currentBoard.slug : '';
         const shareUrl = `${window.location.origin}/${slug}#approval`;
-        
+
         const newWindow = window.open(shareUrl, '_blank');
         if (!newWindow) {
-            alert('⚠️ Seu navegador bloqueou a abertura da nova aba (Bloqueador de Pop-ups). Mas o link é: ' + shareUrl);
+            alert('⚠️ Seu navegador bloqueou a abertura da nova aba. O link é: ' + shareUrl);
         }
-        
+
         navigator.clipboard.writeText(shareUrl).then(() => {
             alert('✅ O Link ' + shareUrl + ' foi copiado pro seu Mouse! Você já pode colar (Ctrl+V) no WhatsApp do cliente.');
         }).catch(() => {
@@ -164,16 +169,16 @@ export default function App() {
                     />
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                        {/* Board Selector */}
+                        {/* Client Filter */}
                         <div style={{
                             display: 'flex', alignItems: 'center', gap: '8px',
                             background: 'white', padding: '4px 14px', borderRadius: '999px',
                             border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                         }}>
-                            <Settings size={16} color="#a0aec0" />
+                            <Users size={16} color="#a0aec0" />
                             <select
-                                value={boardId}
-                                onChange={(e) => changeBoard(e.target.value)}
+                                value={clientFilter}
+                                onChange={(e) => setClientFilter(e.target.value)}
                                 style={{
                                     border: 'none', background: 'transparent',
                                     fontSize: '13px', fontWeight: 500, cursor: 'pointer',
@@ -181,6 +186,7 @@ export default function App() {
                                     maxWidth: '180px', textOverflow: 'ellipsis',
                                 }}
                             >
+                                <option value="all">Todos os Clientes</option>
                                 {MONDAY_BOARDS.map((board) => (
                                     <option key={board.id} value={board.id}>{board.name}</option>
                                 ))}
@@ -253,6 +259,7 @@ export default function App() {
                     onCreateClick={(d) => { setCreateDate(d); setIsCreateOpen(true); }}
                 />
 
+
                 {/* Modals */}
                 <PostDetail
                     item={selectedPost}
@@ -276,7 +283,7 @@ export default function App() {
                     open={isCreateOpen}
                     date={createDate}
                     onClose={() => setIsCreateOpen(false)}
-                    onSubmit={createPost}
+                    onSubmit={(name, date) => createPost(name, date, clientFilter !== 'all' ? clientFilter : MONDAY_BOARDS[0]?.id)}
                 />
             </div>
         </div>

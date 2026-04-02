@@ -28,8 +28,31 @@ export default function PostCard({ item, onClick }) {
             }}
         >
             {postFile && (
-                <div style={{ height: '60px', overflow: 'hidden' }}>
+                <div style={{ height: '60px', overflow: 'hidden', position: 'relative' }}>
                     <FilePreview file={postFile} height="60px" disableViewer />
+                    {item.clientName && (
+                        <span style={{
+                            position: 'absolute',
+                            bottom: '4px',
+                            right: '4px',
+                            background: 'rgba(0,0,0,0.58)',
+                            backdropFilter: 'blur(4px)',
+                            color: 'white',
+                            fontSize: '8px',
+                            fontWeight: 700,
+                            letterSpacing: '0.3px',
+                            padding: '2px 5px',
+                            borderRadius: '4px',
+                            maxWidth: '90px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            lineHeight: 1.4,
+                            pointerEvents: 'none',
+                        }}>
+                            {item.clientName}
+                        </span>
+                    )}
                 </div>
             )}
 
