@@ -8,6 +8,8 @@ import { STATUS_OPTIONS } from './constants';
 import CalendarGrid from '@components/CalendarGrid';
 import PostDetail from '@components/PostDetail';
 import ProfileView from '@components/ProfileView';
+import ApprovalPage from '@components/ApprovalPage';
+import CreatePostModal from '@components/CreatePostModal';
 import SetupScreen from '@components/SetupScreen';
 import LoginPage from '@components/LoginPage';
 import GlobalHeader from '@components/GlobalHeader';
