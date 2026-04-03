@@ -131,7 +131,7 @@ export function useAllPosts(apiToken) {
     // colMaps: { [boardId]: colMap }
     const [colMaps, setColMaps] = useState({});
     // metadata: { boardName: 'Todos os Clientes' }
-    const [metadata] = useState({ boardName: 'Todos os Clientes' });
+    const [metadata, setMetadata] = useState({ boardName: 'Todos os Clientes' });
 
     const fetchAll = useCallback(async (isBackground = false) => {
         if (!apiToken) {
@@ -155,7 +155,12 @@ export function useAllPosts(apiToken) {
             });
 
             setPosts(allPosts);
-            if (!isBackground) setColMaps(newColMaps);
+            if (!isBackground) {
+                setColMaps(newColMaps);
+                // Opcional: log para debug de boards específicos
+                const counts = results.map((r, i) => `${MONDAY_BOARDS[i].name}: ${r.posts.length}`);
+                console.log("Posts carregados por board:", counts.join(' | '));
+            }
         } catch (err) {
             console.error('Erro geral ao buscar todos os boards:', err);
             if (!isBackground) setError('Erro ao carregar dados do Monday.com: ' + err.message);

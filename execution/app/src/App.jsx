@@ -53,6 +53,17 @@ export default function App() {
     const urlPath = window.location.pathname.replace(/^\//, '');
     const currentSlug = urlPath && urlPath !== 'index.html' ? urlPath : null;
 
+    const currentBoard = useMemo(() => {
+        if (currentSlug) return MONDAY_BOARDS.find(b => b.slug === currentSlug);
+        if (clientFilter !== 'all') return MONDAY_BOARDS.find(b => b.id === clientFilter);
+        return null;
+    }, [currentSlug, clientFilter]);
+
+    const displayMetadata = useMemo(() => ({
+        ...metadata,
+        boardName: currentBoard ? currentBoard.name : 'Todos os Clientes'
+    }), [metadata, currentBoard]);
+
     const isApprovalSlug = !!currentSlug;
 
     useEffect(() => {
@@ -163,7 +174,7 @@ export default function App() {
                 <GlobalHeader />
                 <ApprovalPage
                     posts={filteredPosts}
-                    metadata={metadata}
+                    metadata={displayMetadata}
                     onApprove={(id, s) => updatePost(id, { status: s })}
                     onRevision={requestPostRevision}
                     onBack={isInternalPreview ? handleBackToCalendar : null}
@@ -208,7 +219,7 @@ export default function App() {
                     }}>
                         <PageHeader
                             title="Calendário Editorial"
-                            subtitle={`Gerenciando posts em ${metadata.boardName}`}
+                            subtitle={`Gerenciando posts em ${displayMetadata.boardName}`}
                         />
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>

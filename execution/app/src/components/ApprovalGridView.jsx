@@ -55,8 +55,8 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
         <div className="animate-slide-fade-in" style={{ background: '#E4E1E6', minHeight: '100vh' }}>
             {/* Header */}
             <div style={{
-                background: 'white', borderBottom: '1px solid #e2e8f0',
-                padding: '12px 0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                background: 'transparent',
+                padding: '24px 0 12px 0',
             }}>
                 <div style={{ padding: '0 16px', maxWidth: '100%', margin: '0 auto' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -73,12 +73,13 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                 </button>
                             )}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#B5A8FF' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#B5A8FF' }}>
                             <ShieldCheck size={iconSize} />
                             <span style={{
-                                fontWeight: 700,
-                                fontSize: window.innerWidth >= 768 ? '1.1rem' : '0.75rem',
+                                fontWeight: 800,
+                                fontSize: window.innerWidth >= 768 ? '1.5rem' : '0.9rem',
                                 whiteSpace: 'nowrap',
+                                fontFamily: "'Gastromond', 'Playfair Display', serif"
                             }}>
                                 Aprovação - {metadata.boardName}
                             </span>
@@ -175,12 +176,31 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                     <FilePreview file={post.postagem[0]} height="100%" objectFit="cover" disableViewer />
                                 ) : (
                                     <div style={{
-                                        height: '100%', display: 'flex', alignItems: 'center',
-                                        justifyContent: 'center', padding: '8px', textAlign: 'center',
+                                        height: '100%', display: 'flex', flexDirection: 'column',
+                                        alignItems: 'center', justifyContent: 'center',
+                                        background: 'rgba(255,255,255,0.4)',
+                                        position: 'relative'
                                     }}>
+                                        <div style={{
+                                            position: 'absolute', inset: 0,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            background: 'rgba(255,255,255,0.2)',
+                                            backdropFilter: 'blur(2px)'
+                                        }}>
+                                            <span style={{
+                                                fontSize: window.innerWidth >= 768 ? '24px' : '16px',
+                                                color: '#B5A8FF', fontWeight: 900,
+                                                textTransform: 'uppercase', letterSpacing: '2px',
+                                                fontFamily: "'Gastromond', 'Playfair Display', serif",
+                                                opacity: 0.8
+                                            }}>
+                                                Coming Soon
+                                            </span>
+                                        </div>
                                         <span style={{
                                             fontSize: window.innerWidth >= 768 ? '12px' : '10px',
-                                            color: '#a0aec0', fontWeight: 700,
+                                            color: '#4a5568', fontWeight: 600,
+                                            marginTop: '60%', padding: '0 8px'
                                         }}>
                                             {post.name}
                                         </span>

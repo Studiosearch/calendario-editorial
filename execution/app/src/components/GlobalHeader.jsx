@@ -1,39 +1,38 @@
 import React from 'react';
-import logo from '../assets/logo.png';
 
 export default function GlobalHeader() {
     return (
         <header style={{
             background: '#202325',
-            padding: '12px 24px',
+            padding: '0 32px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
             height: '64px',
             zIndex: 1100,
-            position: 'relative',
+            position: 'sticky',
+            top: 0
         }}>
-            {/* Logo Left */}
-            <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                <img 
-                    src={logo} 
-                    alt="Studio Search Logo" 
-                    style={{ 
-                        height: '40px', 
-                        width: 'auto',
-                        display: 'block'
-                    }} 
-                />
-            </div>
-
-            {/* Text Right */}
+            {/* Left Brand */}
             <div style={{ 
                 fontFamily: "'Poppins', sans-serif", 
                 color: '#E4E1E6', 
-                fontSize: '1.25rem', 
-                fontWeight: 800,
-                letterSpacing: '0.05em',
+                fontSize: '0.875rem', 
+                fontWeight: 700,
+                letterSpacing: '0.25em',
+                textTransform: 'uppercase'
+            }}>
+                Studio Search
+            </div>
+
+            {/* Right Brand */}
+            <div style={{ 
+                fontFamily: "'Poppins', sans-serif", 
+                color: '#E4E1E6', 
+                fontSize: '0.875rem', 
+                fontWeight: 700,
+                letterSpacing: '0.25em',
                 textTransform: 'uppercase'
             }}>
                 Studio Search
