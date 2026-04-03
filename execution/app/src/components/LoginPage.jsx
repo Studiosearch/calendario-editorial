@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
+import GlobalHeader from './GlobalHeader';
 
 const CREDENTIALS = [
     { user: 'egle', pass: '270517' },
@@ -32,38 +32,32 @@ export default function LoginPage({ onLogin }) {
 
     return (
         <div style={{
-            minHeight: '100vh', background: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: "'Poppins', sans-serif", padding: '16px'
+            minHeight: '100vh', background: '#E4E1E6',
+            display: 'flex', flexDirection: 'column',
+            fontFamily: "'Poppins', sans-serif"
         }}>
-            <div style={{
-                width: '100%', maxWidth: '400px',
-                background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)',
-                borderRadius: '24px', padding: '48px 40px',
-                border: '1px solid rgba(255,255,255,0.12)',
-                boxShadow: '0 25px 50px rgba(0,0,0,0.4)',
-            }}>
-                {/* Logo / Brand */}
-                <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                    <div style={{
-                        width: '64px', height: '64px', borderRadius: '16px',
-                        background: 'linear-gradient(135deg, #319795 0%, #2c7a7b 100%)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        margin: '0 auto 16px', boxShadow: '0 8px 24px rgba(49,151,149,0.4)',
-                    }}>
-                        <Lock size={28} color="white" />
+            <GlobalHeader />
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+                <div style={{
+                    width: '100%', maxWidth: '400px',
+                    background: 'white',
+                    borderRadius: '24px', padding: '48px 40px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 25px 50px rgba(0,0,0,0.1)',
+                }}>
+                    {/* Brand */}
+                    <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                        <h1 style={{
+                            margin: '0 0 6px', fontSize: '1.6rem', fontWeight: 800,
+                            color: '#203a43', letterSpacing: '-0.02em',
+                            fontFamily: "'Gastromond', 'Playfair Display', serif"
+                        }}>
+                            Acesso Restrito
+                        </h1>
+                        <p style={{ margin: 0, color: '#718096', fontSize: '14px' }}>
+                            Calendário Editorial
+                        </p>
                     </div>
-                    <h1 style={{
-                        margin: '0 0 6px', fontSize: '1.6rem', fontWeight: 800,
-                        color: 'white', letterSpacing: '-0.02em',
-                        fontFamily: "'Gastromond', 'Playfair Display', serif"
-                    }}>
-                        Studio Search
-                    </h1>
-                    <p style={{ margin: 0, color: 'rgba(255,255,255,0.5)', fontSize: '14px' }}>
-                        Calendário Editorial
-                    </p>
-                </div>
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -151,10 +145,10 @@ export default function LoginPage({ onLogin }) {
                         disabled={loading}
                         style={{
                             width: '100%', padding: '14px',
-                            background: loading ? 'rgba(49,151,149,0.5)' : 'linear-gradient(135deg, #319795 0%, #2c7a7b 100%)',
+                            background: loading ? 'rgba(181,168,255,0.5)' : '#B5A8FF',
                             border: 'none', borderRadius: '12px', color: 'white',
                             fontSize: '15px', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-                            boxShadow: '0 4px 16px rgba(49,151,149,0.4)',
+                            boxShadow: '0 4px 16px rgba(181,168,255,0.4)',
                             transition: 'all 0.2s', marginTop: '8px',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                         }}
@@ -163,9 +157,10 @@ export default function LoginPage({ onLogin }) {
                     </button>
                 </form>
 
-                <p style={{ margin: '28px 0 0', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: '12px' }}>
-                    Studio Search © {new Date().getFullYear()}
-                </p>
+                    <p style={{ margin: '28px 0 0', textAlign: 'center', color: '#a0aec0', fontSize: '12px' }}>
+                        Studio Search © {new Date().getFullYear()}
+                    </p>
+                </div>
             </div>
         </div>
     );

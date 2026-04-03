@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
 import { ShieldCheck, Calendar, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { MONDAY_BOARDS } from '../api/mondayApi';
+import GlobalHeader from './GlobalHeader';
 
 export default function SetupScreen({ onConnect }) {
     const [token, setToken] = useState('');
@@ -28,26 +28,27 @@ export default function SetupScreen({ onConnect }) {
 
     return (
         <div style={{
-            minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            minHeight: '100vh', display: 'flex', flexDirection: 'column',
             background: '#E4E1E6',
-            padding: '24px',
             fontFamily: "'Poppins', sans-serif"
         }}>
-            <div style={{
-                background: 'white', padding: '40px', borderRadius: '16px',
-                maxWidth: '500px', width: '100%',
-                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.15)',
-                border: '1px solid #e2e8f0', animation: 'scale-fade-in 0.4s ease-out'
-            }}>
+            <GlobalHeader />
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+                <div style={{
+                    background: 'white', padding: '40px', borderRadius: '16px',
+                    maxWidth: '500px', width: '100%',
+                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)',
+                    border: '1px solid #e2e8f0', animation: 'scale-fade-in 0.4s ease-out'
+                }}>
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                     <div style={{
-                        width: '64px', height: '64px', background: '#ebf8ff',
+                        width: '64px', height: '64px', background: '#f5f3ff',
                         borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        margin: '0 auto 20px', color: '#3182ce',
-                        boxShadow: '0 4px 14px rgba(49,130,206,0.15)',
+                        margin: '0 auto 20px', color: '#B5A8FF',
+                        boxShadow: '0 4px 14px rgba(181,168,255,0.15)',
                     }}>
-                        <Calendar size={32} />
+                        <ShieldCheck size={32} />
                     </div>
                     <h1 style={{
                         margin: '0 0 12px',
@@ -90,7 +91,7 @@ export default function SetupScreen({ onConnect }) {
                                 border: '1px solid #cbd5e0', borderRadius: '8px',
                                 fontFamily: 'monospace', background: '#f7fafc', outline: 'none',
                             }}
-                            onFocus={(e) => { e.target.style.borderColor = '#3182ce'; e.target.style.background = '#fff'; }}
+                            onFocus={(e) => { e.target.style.borderColor = '#B5A8FF'; e.target.style.background = '#fff'; }}
                             onBlur={(e) => { e.target.style.borderColor = '#cbd5e0'; e.target.style.background = '#f7fafc'; }}
                         />
                         <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#a0aec0' }}>
@@ -111,7 +112,7 @@ export default function SetupScreen({ onConnect }) {
                                     border: '1px solid #cbd5e0', borderRadius: '8px', cursor: 'pointer',
                                     appearance: 'none', background: '#fff', color: '#2d3748', outline: 'none',
                                 }}
-                                onFocus={(e) => e.target.style.borderColor = '#3182ce'}
+                                onFocus={(e) => e.target.style.borderColor = '#B5A8FF'}
                                 onBlur={(e) => e.target.style.borderColor = '#cbd5e0'}
                             >
                                 {MONDAY_BOARDS.map((board) => (
@@ -134,10 +135,10 @@ export default function SetupScreen({ onConnect }) {
                         disabled={!token.trim() || isValidating}
                         style={{
                             marginTop: '12px', padding: '14px', border: 'none', borderRadius: '8px',
-                            background: 'linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%)',
+                            background: '#B5A8FF',
                             color: 'white', fontSize: '16px', fontWeight: 700, cursor: 'pointer',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                            boxShadow: '0 4px 14px rgba(49,130,206,0.3)', transition: 'all 0.2s',
+                            boxShadow: '0 4px 14px rgba(181,168,255,0.3)', transition: 'all 0.2s',
                             opacity: (!token.trim() || isValidating) ? 0.7 : 1,
                         }}
                     >
@@ -154,10 +155,15 @@ export default function SetupScreen({ onConnect }) {
                 </form>
 
                 <style>{`
-          .animate-spin { animation: spin 1s linear infinite; }
-          @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        `}</style>
+                  .animate-spin { animation: spin 1s linear infinite; }
+                  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                `}</style>
+
+                <p style={{ marginTop: '24px', textAlign: 'center', color: '#a0aec0', fontSize: '11px' }}>
+                    Studio Search © {new Date().getFullYear()}
+                </p>
             </div>
         </div>
-    );
+    </div>
+);
 }

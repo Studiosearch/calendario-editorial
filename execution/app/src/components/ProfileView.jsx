@@ -240,7 +240,7 @@ export default function ProfileView({ posts, metadata, open, onClose, onApprove,
                                                 if (onRevision) onRevision(quickPost.id, ['Feedback Geral'], revisionText);
                                                 setQuickPost(null);
                                             }}
-                                            style={{ flex: 2, padding: '8px', background: '#3182ce', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
+                                            style={{ flex: 2, padding: '8px', background: '#B5A8FF', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}
                                         >
                                             Enviar Feedback
                                         </button>

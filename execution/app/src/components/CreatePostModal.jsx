@@ -97,10 +97,10 @@ export default function CreatePostModal({ open, date, onClose, onSubmit }) {
                         </button>
                         <button type="submit" disabled={isSubmitting} style={{
                             flex: 2, padding: '10px', border: 'none',
-                            background: 'linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%)',
+                            background: '#B5A8FF',
                             color: 'white', fontSize: '14px', fontWeight: 600,
                             cursor: 'pointer', borderRadius: '12px',
-                            boxShadow: '0 4px 6px rgba(49,130,206,0.3)',
+                            boxShadow: '0 4px 6px rgba(181,168,255,0.3)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                             opacity: isSubmitting ? 0.7 : 1,
                         }}>

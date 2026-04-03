@@ -85,7 +85,7 @@ export default function PostDetailPlanning({
                         background: '#f7fafc', fontSize: '13px', fontFamily: 'inherit', color: '#1a202c',
                         resize: 'vertical', outline: 'none',
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#3182ce'}
+                    onFocus={(e) => e.target.style.borderColor = '#B5A8FF'}
                     onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                 />
             </div>
@@ -103,7 +103,7 @@ export default function PostDetailPlanning({
                                 type="checkbox"
                                 checked={plataformas.includes(p.value)}
                                 onChange={() => handleToggle(p.value)}
-                                style={{ accentColor: '#3182ce' }}
+                                style={{ accentColor: '#B5A8FF' }}
                             />
                             <span style={{ color: '#1a202c' }}>{p.label}</span>
                         </label>

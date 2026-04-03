@@ -73,7 +73,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                 </button>
                             )}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#319795' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#B5A8FF' }}>
                             <ShieldCheck size={iconSize} />
                             <span style={{
                                 fontWeight: 700,
@@ -274,12 +274,12 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                     onClick={() => setVisibleMonthLimit(prev => prev + 1)}
                                     style={{
                                         padding: '12px 24px', borderRadius: '8px', border: 'none',
-                                        background: '#319795', color: 'white', fontWeight: 600,
-                                        fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
-                                        boxShadow: '0 4px 6px rgba(49,151,149,0.3)', transition: 'background 0.2s', width: window.innerWidth >= 768 ? 'auto' : '100%', justifyContent: 'center'
+                                        background: '#B5A8FF', color: 'white', fontWeight: 600,
+                                        fontSize: '13px', cursor: 'pointer', transition: 'all 0.2s',
+                                        boxShadow: '0 4px 6px rgba(181, 168, 255, 0.2)',
                                     }}
-                                    onMouseEnter={(e) => e.target.style.background = '#285e61'}
-                                    onMouseLeave={(e) => e.target.style.background = '#319795'}
+                                    onMouseEnter={(e) => e.target.style.background = '#9f90ff'}
+                                    onMouseLeave={(e) => e.target.style.background = '#B5A8FF'}
                                 >
                                     Ver próximo mês
                                 </button>

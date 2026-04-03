@@ -71,14 +71,13 @@ export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCre
                     <button
                         onClick={onProfileClick}
                         style={{
-                            display: 'flex', alignItems: 'center', gap: '6px',
-                            padding: '6px 14px', borderRadius: '999px',
-                            border: '1px solid #3182ce', background: 'transparent',
-                            color: '#3182ce', fontSize: '13px', fontWeight: 600,
+                            padding: '6px 12px', borderRadius: '8px',
+                            border: '1px solid #B5A8FF', background: 'transparent',
+                            color: '#B5A8FF', fontSize: '13px', fontWeight: 600,
                             cursor: 'pointer', transition: 'all 0.2s',
                         }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = '#3182ce'; e.currentTarget.style.color = 'white'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#3182ce'; }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#B5A8FF'; e.currentTarget.style.color = 'white'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#B5A8FF'; }}
                     >
                         <LayoutGrid size={14} />
                         {!isMobile && 'Perfil'}
@@ -185,8 +184,8 @@ export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCre
                                     }}>
                                         <span style={{
                                             fontSize: '12px', fontWeight: 700,
-                                            color: isToday ? '#3182ce' : '#a0aec0',
-                                            background: isToday ? '#ebf8ff' : 'none',
+                                            color: isToday ? '#B5A8FF' : '#a0aec0',
+                                            background: isToday ? '#f5f3ff' : 'none',
                                             borderRadius: isToday ? '50%' : 0,
                                             width: isToday ? '24px' : 'auto',
                                             height: isToday ? '24px' : 'auto',
@@ -202,9 +201,9 @@ export default function CalendarGrid({ posts, onPostClick, onProfileClick, onCre
                                                 width: '20px', height: '20px', borderRadius: '4px',
                                                 border: 'none', background: 'transparent', cursor: 'pointer',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                color: '#3182ce', transition: 'all 0.2s',
+                                                color: '#B5A8FF', transition: 'all 0.2s',
                                             }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = '#ebf8ff'}
+                                            onMouseEnter={(e) => e.currentTarget.style.background = '#f5f3ff'}
                                             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                                         >
                                             <Plus size={14} />

@@ -58,7 +58,7 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                     }}>
                         <X size={20} />
                     </button>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#319795' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#B5A8FF' }}>
                         <ShieldCheck size={14} />
                         <span style={{
                             fontWeight: 700,
@@ -146,7 +146,7 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                         display: 'flex', flexDirection: 'column', gap: window.innerWidth >= 768 ? '20px' : '16px',
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#718096' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#B5A8FF' }}>
                                 <Calendar size={16} />
                                 <span style={{ fontSize: '13px', fontWeight: 700 }}>
                                     {post.dataPostagem?.toLocaleDateString('pt-BR') || 'Data a definir'}
@@ -172,7 +172,7 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                                     {post.plataformas.map((p) => (
                                         <span key={p} style={{
                                             padding: '2px 10px', borderRadius: '6px',
-                                            background: '#ebf8ff', color: '#3182ce',
+                                            background: '#f5f3ff', color: '#B5A8FF',
                                             fontSize: '11px', fontWeight: 600,
                                         }}>
                                             {p}
@@ -200,11 +200,11 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                                     width: '100%',
                                     padding: window.innerWidth >= 768 ? '16px' : '14px',
                                     border: 'none', borderRadius: '12px',
-                                    background: post.status === 'Aprovado' ? '#c6f6d5' : 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+                                    background: post.status === 'Aprovado' ? '#c6f6d5' : 'linear-gradient(135deg, #B5A8FF 0%, #9f91f5 100%)',
                                     color: 'white', fontSize: '16px', fontWeight: 700,
                                     cursor: post.status === 'Aprovado' ? 'not-allowed' : 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                    boxShadow: '0 4px 6px rgba(72,187,120,0.3)',
+                                    boxShadow: '0 4px 6px rgba(181,168,255,0.3)',
                                     transition: 'all 0.2s', opacity: isSubmitting ? 0.7 : 1,
                                 }}
                             >
@@ -215,8 +215,8 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                                 disabled={post.status === 'Aprovado' || isSubmitting}
                                 style={{
                                     width: '100%', padding: window.innerWidth >= 768 ? '12px' : '10px',
-                                    borderRadius: '12px', border: '2px solid #ecc94b',
-                                    background: 'transparent', color: '#d69e2e',
+                                    borderRadius: '12px', border: '2px solid #B5A8FF',
+                                    background: 'transparent', color: '#B5A8FF',
                                     fontSize: '14px', fontWeight: 600,
                                     cursor: post.status === 'Aprovado' ? 'not-allowed' : 'pointer',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',

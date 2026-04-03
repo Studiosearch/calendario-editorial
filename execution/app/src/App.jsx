@@ -8,10 +8,9 @@ import { STATUS_OPTIONS } from './constants';
 import CalendarGrid from '@components/CalendarGrid';
 import PostDetail from '@components/PostDetail';
 import ProfileView from '@components/ProfileView';
-import ApprovalPage from '@components/ApprovalPage';
-import CreatePostModal from '@components/CreatePostModal';
 import SetupScreen from '@components/SetupScreen';
 import LoginPage from '@components/LoginPage';
+import GlobalHeader from '@components/GlobalHeader';
 
 const ALL_STATUS_OPTIONS = [
     { label: 'Todos os Status', value: 'all' },
@@ -49,10 +48,10 @@ export default function App() {
     const [createDate, setCreateDate] = useState(null);
 
     // Guard: show login if not authenticated AND this is the root/main URL (not an approval slug)
-    const isApprovalSlug = (() => {
-        const slug = window.location.pathname.replace(/^\//, '');
-        return slug && slug !== 'index.html';
-    })();
+    const urlPath = window.location.pathname.replace(/^\//, '');
+    const currentSlug = urlPath && urlPath !== 'index.html' ? urlPath : null;
+
+    const isApprovalSlug = !!currentSlug;
 
     useEffect(() => {
         const handleHash = () => {
@@ -66,6 +65,19 @@ export default function App() {
 
     const filteredPosts = useMemo(() => {
         let result = posts;
+
+        // Se for página de aprovação (slug na URL), filtra obrigatoriamente pelo board correspondente
+        if (view === 'approval' && currentSlug) {
+            const targetBoard = MONDAY_BOARDS.find(b => b.slug === currentSlug);
+            if (targetBoard) {
+                result = result.filter(p => p.boardId === targetBoard.id);
+            }
+            // Na aprovação, normalmente filtramos apenas os que estão em aprovação cliente ou aprovados
+            // Mas seguindo a lógica anterior, mostramos o que estiver no board.
+            return result;
+        }
+
+        // Filtros Internos (Calendário Geral)
         if (statusFilter !== 'all') {
             if (statusFilter === 'agendados_group') {
                 result = result.filter(p => p.status === 'Agendado' || p.status === 'Agendado MLABS');
@@ -75,7 +87,7 @@ export default function App() {
         }
         if (clientFilter !== 'all') result = result.filter(p => p.boardId === clientFilter);
         return result;
-    }, [posts, statusFilter, clientFilter]);
+    }, [posts, statusFilter, clientFilter, view, currentSlug]);
 
     // Login guard — placed after all hooks to respect React's rules
     if (!isAuthenticated && !isApprovalSlug) {
@@ -132,7 +144,7 @@ export default function App() {
                 }}>
                     <div style={{
                         width: '48px', height: '48px', border: '4px solid #e2e8f0',
-                        borderTopColor: '#3182ce', borderRadius: '50%',
+                        borderTopColor: '#B5A8FF', borderRadius: '50%',
                         animation: 'spin 0.8s linear infinite',
                     }} />
                     <span style={{ color: '#718096', fontWeight: 500 }}>Carregando...</span>
@@ -145,162 +157,179 @@ export default function App() {
     // Approval view
     if (view === 'approval') {
         return (
-            <ApprovalPage
-                posts={filteredPosts}
-                metadata={metadata}
-                onApprove={(id, s) => updatePost(id, { status: s })}
-                onRevision={requestPostRevision}
-                onBack={isInternalPreview ? handleBackToCalendar : null}
-            />
+            <div style={{ background: '#E4E1E6', minHeight: '100vh' }}>
+                <GlobalHeader />
+                <ApprovalPage
+                    posts={filteredPosts}
+                    metadata={metadata}
+                    onApprove={(id, s) => updatePost(id, { status: s })}
+                    onRevision={requestPostRevision}
+                    onBack={isInternalPreview ? handleBackToCalendar : null}
+                />
+            </div>
         );
     }
 
     return (
         <div className="animate-scale-fade-in" style={{ background: '#E4E1E6', minHeight: '100vh', paddingBottom: '40px' }}>
+            <GlobalHeader />
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-            <div style={{ maxWidth: '100%', margin: '0 auto', paddingTop: '24px', paddingLeft: '16px', paddingRight: '16px' }}>
-                {/* Error */}
-                {error && (
-                    <div style={{
-                        padding: '12px 16px', marginBottom: '16px', borderRadius: '8px',
-                        background: '#fff5f5', border: '1px solid #fc8181', color: '#c53030',
-                        fontWeight: 500, fontSize: '14px',
-                    }}>
-                        {error}
-                    </div>
-                )}
-
-                {/* Top bar */}
+            <div style={{ 
+                maxWidth: '1280px', 
+                margin: '0 auto', 
+                paddingTop: '24px', 
+                paddingLeft: '16px', 
+                paddingRight: '16px',
+            }}>
                 <div style={{
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    marginBottom: '24px', flexWrap: 'wrap', gap: '12px',
+                    background: '#f8fafc',
+                    borderRadius: '20px',
+                    padding: '24px',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05)',
+                    border: '1px solid #e2e8f0',
                 }}>
-                    <PageHeader
-                        title="Calendário Editorial"
-                        subtitle={`Gerenciando posts em ${metadata.boardName}`}
-                    />
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                        {/* Client Filter */}
+                    {/* Error */}
+                    {error && (
                         <div style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            background: 'white', padding: '4px 14px', borderRadius: '999px',
-                            border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                            padding: '12px 16px', marginBottom: '16px', borderRadius: '8px',
+                            background: '#fff5f5', border: '1px solid #fc8181', color: '#c53030',
+                            fontWeight: 500, fontSize: '14px',
                         }}>
-                            <Users size={16} color="#a0aec0" />
-                            <select
-                                value={clientFilter}
-                                onChange={(e) => setClientFilter(e.target.value)}
-                                style={{
-                                    border: 'none', background: 'transparent',
-                                    fontSize: '13px', fontWeight: 500, cursor: 'pointer',
-                                    outline: 'none', padding: '6px 0', color: '#4a5568',
-                                    maxWidth: '180px', textOverflow: 'ellipsis',
-                                }}
-                            >
-                                <option value="all">Todos os Clientes</option>
-                                {MONDAY_BOARDS.map((board) => (
-                                    <option key={board.id} value={board.id}>{board.name}</option>
-                                ))}
-                            </select>
+                            {error}
                         </div>
+                    )}
 
-                        {/* Logout */}
-                        <button
-                            onClick={clearConfig}
-                            title="Desconectar do Monday.com"
-                            style={{
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                width: '36px', height: '36px', border: '1px solid #e2e8f0', borderRadius: '50%',
-                                background: 'white', color: '#e53e3e', cursor: 'pointer',
-                                boxShadow: '0 1px 2px rgba(0,0,0,0.05)', transition: 'all 0.2s',
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = '#fff5f5'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-                        >
-                            <LogOut size={16} />
-                        </button>
+                    {/* Top bar */}
+                    <div style={{
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        marginBottom: '24px', flexWrap: 'wrap', gap: '12px',
+                    }}>
+                        <PageHeader
+                            title="Calendário Editorial"
+                            subtitle={`Gerenciando posts em ${metadata.boardName}`}
+                        />
 
-                        {/* Forward button */}
-                        <button
-                            onClick={handleForwardToClient}
-                            style={{
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                            {/* Client Filter */}
+                            <div style={{
                                 display: 'flex', alignItems: 'center', gap: '8px',
-                                padding: '10px 20px', border: 'none', borderRadius: '12px',
-                                background: 'linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%)',
-                                color: 'white', fontWeight: 600, fontSize: '14px',
-                                cursor: 'pointer', boxShadow: '0 4px 6px rgba(49,130,206,0.3)',
-                                transition: 'all 0.2s',
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-                            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                        >
-                            <Send size={18} /> Encaminhar para Aprovação
-                        </button>
+                                background: 'white', padding: '4px 14px', borderRadius: '999px',
+                                border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                            }}>
+                                <Users size={16} color="#a0aec0" />
+                                <select
+                                    value={clientFilter}
+                                    onChange={(e) => setClientFilter(e.target.value)}
+                                    style={{
+                                        border: 'none', background: 'transparent',
+                                        fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+                                        outline: 'none', padding: '6px 0', color: '#4a5568',
+                                        maxWidth: '180px', textOverflow: 'ellipsis',
+                                    }}
+                                >
+                                    <option value="all">Todos os Clientes</option>
+                                    {MONDAY_BOARDS.map((board) => (
+                                        <option key={board.id} value={board.id}>{board.name}</option>
+                                    ))}
+                                </select>
+                            </div>
 
-                        {/* Status filter */}
-                        <div style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            background: 'white', padding: '4px 14px', borderRadius: '999px',
-                            border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                        }}>
-                            <Filter size={16} color="#a0aec0" />
-                            <select
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
+                            {/* Logout */}
+                            <button
+                                onClick={clearConfig}
+                                title="Desconectar do Monday.com"
                                 style={{
-                                    border: 'none', background: 'transparent',
-                                    fontSize: '13px', fontWeight: 500, cursor: 'pointer',
-                                    outline: 'none', padding: '6px 0', color: '#4a5568',
-                                    minWidth: '130px',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    width: '36px', height: '36px', border: '1px solid #e2e8f0', borderRadius: '50%',
+                                    background: 'white', color: '#e53e3e', cursor: 'pointer',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)', transition: 'all 0.2s',
                                 }}
+                                onFocus={(e) => e.target.style.borderColor = '#B5A8FF'}
+                                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
                             >
-                                <option value="all">Todos os Status</option>
-                                <option value="agendados_group">Agendados (Todos)</option>
-                                {STATUS_OPTIONS.map((opt) => (
-                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                ))}
-                            </select>
+                                <LogOut size={16} />
+                            </button>
+
+                            {/* Forward button */}
+                            <button
+                                onClick={handleForwardToClient}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                    padding: '10px 20px', border: 'none', borderRadius: '12px',
+                                    background: '#B5A8FF',
+                                    color: 'white', fontWeight: 600, fontSize: '14px',
+                                    cursor: 'pointer', boxShadow: '0 4px 6px rgba(181,168,255,0.3)',
+                                    transition: 'all 0.2s',
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                            >
+                                <Send size={18} /> Encaminhar para Aprovação
+                            </button>
+
+                            {/* Status filter */}
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                                background: 'white', padding: '4px 14px', borderRadius: '999px',
+                                border: '1px solid #e2e8f0', boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                            }}>
+                                <Filter size={16} color="#a0aec0" />
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    style={{
+                                        border: 'none', background: 'transparent',
+                                        fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+                                        outline: 'none', padding: '6px 0', color: '#4a5568',
+                                        minWidth: '130px',
+                                    }}
+                                >
+                                    <option value="all">Todos os Status</option>
+                                    <option value="agendados_group">Agendados (Todos)</option>
+                                    {STATUS_OPTIONS.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                     </div>
+
+                    {/* Quick Status Buttons */}
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                        {QUICK_STATUS_FILTERS.map(f => {
+                            const isActive = statusFilter === f.value;
+                            return (
+                                <button
+                                    key={f.value}
+                                    onClick={() => setStatusFilter(isActive ? 'all' : f.value)}
+                                    style={{
+                                        padding: '8px 16px',
+                                        borderRadius: '12px',
+                                        fontSize: '13px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        background: isActive ? '#B5A8FF' : 'white',
+                                        color: isActive ? 'white' : '#4a5568',
+                                        border: '1px solid',
+                                        borderColor: isActive ? '#B5A8FF' : '#e2e8f0',
+                                        boxShadow: isActive ? '0 4px 6px rgba(181,168,255,0.2)' : '0 1px 2px rgba(0,0,0,0.05)',
+                                    }}
+                                >
+                                    {f.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Calendar Grid */}
+                    <CalendarGrid
+                        posts={filteredPosts}
+                        onPostClick={setSelectedPost}
+                        onProfileClick={() => setProfileOpen(true)}
+                        onCreateClick={(d) => { setCreateDate(d); setIsCreateOpen(true); }}
+                    />
                 </div>
-
-                {/* Quick Status Buttons */}
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                    {QUICK_STATUS_FILTERS.map(f => {
-                        const isActive = statusFilter === f.value;
-                        return (
-                            <button
-                                key={f.value}
-                                onClick={() => setStatusFilter(isActive ? 'all' : f.value)}
-                                style={{
-                                    padding: '8px 16px',
-                                    borderRadius: '12px',
-                                    fontSize: '13px',
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                    background: isActive ? '#3182ce' : 'white',
-                                    color: isActive ? 'white' : '#4a5568',
-                                    border: '1px solid',
-                                    borderColor: isActive ? '#3182ce' : '#e2e8f0',
-                                    boxShadow: isActive ? '0 4px 6px rgba(49,130,206,0.2)' : '0 1px 2px rgba(0,0,0,0.05)',
-                                }}
-                            >
-                                {f.label}
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {/* Calendar */}
-                <CalendarGrid
-                    posts={filteredPosts}
-                    onPostClick={setSelectedPost}
-                    onProfileClick={() => setProfileOpen(true)}
-                    onCreateClick={(d) => { setCreateDate(d); setIsCreateOpen(true); }}
-                />
-
 
                 {/* Modals */}
                 <PostDetail
@@ -329,5 +358,6 @@ export default function App() {
                 />
             </div>
         </div>
+
     );
 }

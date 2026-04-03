@@ -50,10 +50,10 @@ export default function PostDetailCreative({ item, legenda, onLegendaChange, onU
                         style={{
                             display: 'flex', alignItems: 'center', gap: '6px',
                             padding: '4px 10px', border: 'none', background: 'transparent',
-                            color: '#3182ce', fontSize: '12px', fontWeight: 600,
+                            color: '#B5A8FF', fontSize: '12px', fontWeight: 600,
                             cursor: 'pointer', borderRadius: '6px',
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = '#ebf8ff'}
+                        onMouseEnter={(e) => e.currentTarget.style.background = '#f5f3ff'}
                         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                     >
                         <Upload size={14} /> Anexar Arquivo
@@ -107,7 +107,7 @@ export default function PostDetailCreative({ item, legenda, onLegendaChange, onU
                     ) : (
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', flexDirection: 'column', gap: '8px' }}>
                             {isUploading ? (
-                                <div className="spinner" style={{ width: '24px', height: '24px', border: '3px solid #e2e8f0', borderTopColor: '#3182ce', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                                <div className="spinner" style={{ width: '24px', height: '24px', border: '3px solid #e2e8f0', borderTopColor: '#B5A8FF', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
                             ) : (
                                 <span style={{ color: '#a0aec0', fontSize: '14px' }}>Sem arte anexada</span>
                             )}
@@ -132,7 +132,7 @@ export default function PostDetailCreative({ item, legenda, onLegendaChange, onU
                         background: 'white', fontSize: '14px', fontFamily: 'inherit', color: '#1a202c',
                         resize: 'vertical', outline: 'none', transition: 'border-color 0.2s',
                     }}
-                    onFocus={(e) => e.target.style.borderColor = '#3182ce'}
+                    onFocus={(e) => e.target.style.borderColor = '#B5A8FF'}
                     onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                 />
             </div>

@@ -27,10 +27,10 @@ export default function PostDetailFooter({ onSave, isSaving, onDelete }) {
                 style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
                     padding: '10px 32px', border: 'none',
-                    background: 'linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%)',
+                    background: '#B5A8FF',
                     color: 'white', fontWeight: 600, fontSize: '14px',
                     borderRadius: '12px', cursor: 'pointer',
-                    boxShadow: '0 4px 6px rgba(49, 130, 206, 0.3)',
+                    boxShadow: '0 4px 6px rgba(181, 168, 255, 0.3)',
                     transition: 'all 0.2s', opacity: isSaving ? 0.7 : 1,
                 }}
                 onMouseEnter={(e) => { if (!isSaving) e.currentTarget.style.transform = 'translateY(-1px)'; }}
