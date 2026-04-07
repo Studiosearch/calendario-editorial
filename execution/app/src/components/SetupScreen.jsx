@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { ShieldCheck, Calendar, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { MONDAY_BOARDS } from '../api/mondayApi';
 import GlobalHeader from './GlobalHeader';

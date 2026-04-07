@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import GlobalHeader from './GlobalHeader';
 
