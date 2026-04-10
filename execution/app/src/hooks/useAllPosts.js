@@ -171,7 +171,7 @@ export function useAllPosts(apiToken) {
 
     useEffect(() => {
         fetchAll();
-        const timerId = setInterval(() => fetchAll(true), 20000);
+        const timerId = setInterval(() => fetchAll(true), 60000);
         return () => clearInterval(timerId);
     }, [fetchAll]);
 

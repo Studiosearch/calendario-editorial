@@ -33,6 +33,21 @@ const identifyColumns = (boardColumns) => {
     // Fallback: se nenhum status principal bateu no título, pega a primeira coluna tipo status
     if (!colMap.status) colMap.status = boardColumns.find(c => c.type === 'status')?.id;
 
+    // Fallback robusto para revisaoFiles: se ainda não detectado pelo nome,
+    // pega qualquer coluna de arquivo que não seja já a coluna postagem
+    if (!colMap.revisaoFiles) {
+        const allFileCols = boardColumns.filter(c => c.type === 'file');
+        if (allFileCols.length > 1) {
+            const extra = allFileCols.find(c => c.id !== colMap.postagem);
+            if (extra) {
+                colMap.revisaoFiles = extra.id;
+                console.log('📎 Coluna de revisão detectada via fallback (2ª coluna de arquivo):', extra.title, extra.id);
+            }
+        } else if (allFileCols.length === 1 && !colMap.postagem) {
+            // Se existe só uma coluna de arquivo e ainda não mapeamos postagem, não sobrescreve
+        }
+    }
+
     return colMap;
 };
 
@@ -96,9 +111,16 @@ export function usePosts(apiToken, boardId) {
                 }
 
                 if (!isBackground) {
-                    // DEBUG LOG: Se precisar checar no console os IDs das colunas
-                    console.log(`📌 Colunas lidas do quadro ${board.name}:`, board.columns);
-                    console.log(`📌 Mapeamento das colunas (app -> monday):`, cols);
+                    // DEBUG LOG: Sempre mostra as colunas e mapeamento para facilitar debug
+                    console.log(`📌 Colunas do quadro "${board.name}":`,
+                        board.columns.map(c => `${c.title} [${c.type}] id=${c.id}`).join(' | ')
+                    );
+                    console.log(`📌 Mapeamento (app → monday):`, cols);
+                    if (cols.revisaoFiles) {
+                        console.log(`✅ Coluna de revisão (arquivos) detectada: id=${cols.revisaoFiles}`);
+                    } else {
+                        console.warn(`⚠️ Coluna de revisão (arquivos) NÃO detectada. Verifique se existe uma coluna de tipo "Arquivo" no board.`);
+                    }
                 }
 
                 const mappedPosts = board.items_page.items.map(item => {
@@ -186,10 +208,10 @@ export function usePosts(apiToken, boardId) {
 
         fetchBoardData();
 
-        // Polling a cada 20 segundos
+        // Polling a cada 60 segundos (reduzido para evitar rate limit 429)
         const timerId = setInterval(() => {
             fetchBoardData(true);
-        }, 20000);
+        }, 60000);
 
         return () => clearInterval(timerId);
     }, [apiToken, boardId]);
