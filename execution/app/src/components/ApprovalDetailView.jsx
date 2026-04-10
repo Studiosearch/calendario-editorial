@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Calendar, CheckCircle, AlertCircle, Send, X, Share2, ShieldCheck, ChevronLeft, ChevronRight, ClipboardList } from 'lucide-react';
+import { Calendar, CheckCircle, AlertCircle, Send, X, Share2, ShieldCheck, ChevronLeft, ChevronRight, ClipboardList, MessageSquareText } from 'lucide-react';
 import FilePreview from './FilePreview';
 
 export default function ApprovalDetailView({ post, metadata, onClose, onApprove, onRevision }) {
@@ -222,6 +222,25 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                         }}>
                             {post.legenda || 'Sem legenda.'}
                         </p>
+
+                        {/* Feedback do Cliente (Aparece se houver ou se estiver em estado de revisão) */}
+                        {post.alteracoesSolicitadas && (
+                            <div style={{
+                                padding: '16px', borderRadius: '12px',
+                                background: '#fff7ed', border: '1px solid #fed7aa',
+                                display: 'flex', flexDirection: 'column', gap: '8px'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#c2410c' }}>
+                                    <MessageSquareText size={16} />
+                                    <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                        Feedback Anterior
+                                    </span>
+                                </div>
+                                <p style={{ margin: 0, fontSize: '14px', color: '#9a3412', lineHeight: 1.5 }}>
+                                    {post.alteracoesSolicitadas}
+                                </p>
+                            </div>
+                        )}
 
                         <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: 0 }} />
 

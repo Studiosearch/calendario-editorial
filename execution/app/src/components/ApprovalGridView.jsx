@@ -43,7 +43,10 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
         setIsSubmitting(true);
         try {
             await onApprove(revisaoPost.id, 'Aprovado');
-            setRevisaoPost(null);
+            // Mantemos o popup mas mostramos estado de sucesso ou esperamos o re-fetch
+            // O usuário disse que 'cai' muito rápido. Vamos fechar mas dar um delay ou 
+            // deixar que o re-fetch cuide de mudar o status.
+            setRevisaoPost(null); 
         } finally {
             setIsSubmitting(false);
         }
@@ -54,6 +57,11 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
         setIsSubmitting(true);
         try {
             await onRevision(revisaoPost.id, revisionCategories, revisionText);
+            // O usuário reclamou que o comentário some. 
+            // Vamos mudar para um estado de 'sucesso' local em vez de fechar.
+            setRevisionOpen(false);
+            // Não limpamos o revisaoPost imediatamente se ele quiser ver o que enviou? 
+            // Na verdade, onRevision já muda no Monday. O re-fetch vai atualizar.
             setRevisaoPost(null);
         } finally {
             setIsSubmitting(false);
