@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { Calendar, CheckCircle, AlertCircle, Send, X, Share2, ShieldCheck, ChevronLeft, ChevronRight, ClipboardList, MessageSquareText } from 'lucide-react';
 import FilePreview from './FilePreview';
 
+const normalizeStatus = (s) => (s || '').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 export default function ApprovalDetailView({ post, metadata, onClose, onApprove, onRevision }) {
     const [revisionOpen, setRevisionOpen] = useState(false);
     const [revisionCategories, setRevisionCategories] = useState([]);
@@ -56,8 +58,8 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
         );
     };
 
-    const statusUpper = (post.status || '').toUpperCase();
-    const isRevised = statusUpper === 'REVISADO AG. APROVAÇÃO';
+    const statusUpper = normalizeStatus(post.status);
+    const isRevised = statusUpper === 'REVISADO AG. APROVACAO';
     const mediaFiles = (isRevised && post.revisaoFiles?.length > 0) 
         ? post.revisaoFiles 
         : post.postagem;

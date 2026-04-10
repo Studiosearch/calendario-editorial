@@ -14,6 +14,8 @@ function useBreakpointValue(values) {
     return val;
 }
 
+const normalizeStatus = (s) => (s || '').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 export default function ApprovalGridView({ posts, metadata, onPostClick, onBack, onApprove, onRevision }) {
     const iconSize = useBreakpointValue({ base: 14, md: 20 });
     const statusIconSize = useBreakpointValue({ base: 10, md: 18 });
@@ -226,8 +228,8 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                 }}
                             >
                                 {(() => {
-                                    const statusUpper = (post.status || '').toUpperCase();
-                                    const isRevised = statusUpper === 'REVISADO AG. APROVAÇÃO';
+                                    const statusNorm = normalizeStatus(post.status);
+                                    const isRevised = statusNorm === 'REVISADO AG. APROVACAO';
                                     const hasRevisedFiles = post.revisaoFiles?.length > 0;
                                     const displayFile = (isRevised && hasRevisedFiles) ? post.revisaoFiles[0] : post.postagem?.[0];
 
@@ -286,8 +288,8 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                 })()}
 
                                     {(() => {
-                                        const statusUpper = (post.status || '').toUpperCase();
-                                        const isRevised = statusUpper === 'REVISADO AG. APROVAÇÃO';
+                                        const statusNorm = normalizeStatus(post.status);
+                                        const isRevised = statusNorm === 'REVISADO AG. APROVACAO';
                                         const hasRevisedFiles = post.revisaoFiles?.length > 0;
                                         if (isRevised && hasRevisedFiles && post.postagem?.length > 0) {
                                             return (
@@ -332,8 +334,8 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
 
                                 {/* Máscara de Destaque (Apenas para posts em revisão/análise interna) */}
                                 {(() => {
-                                    const s = (post.status || '').toUpperCase();
-                                    if (s === 'REVISÃO' || s === 'REVISADO AG. APROVAÇÃO') {
+                                    const s = normalizeStatus(post.status);
+                                    if (s === 'REVISAO' || s === 'REVISADO AG. APROVACAO') {
                                         return (
                                             <div style={{
                                                 position: 'absolute', inset: 0,
@@ -349,8 +351,10 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
 
                                 {/* Overlay Sutil para Aguardando Aprovação (Sem texto, apenas opacidade) */}
                                 {(() => {
-                                    const s = (post.status || '').toUpperCase();
-                                    const excluded = ['APROVADO', 'AGENDADO', 'POSTADO', 'REVISÃO', 'REVISADO AG. APROVAÇÃO', 'REVISADO AG. APROVAÇÃO'];
+                                    const s = normalizeStatus(post.status);
+                                    // Lista ampliada de exclusão para garantir que Agendados e Aprovados fiquem LIMPOS
+                                    const excluded = ['APROVADO', 'APROVADA', 'AGENDADO', 'AGENDADA', 'POSTADO', 'REVISAO', 'REVISADO AG. APROVACAO'];
+                                    
                                     if (!excluded.includes(s)) {
                                         return (
                                             <div style={{

@@ -4,12 +4,15 @@ import ApprovalGridView from './ApprovalGridView';
 import ApprovalDetailView from './ApprovalDetailView';
 import FilePreview from './FilePreview';
 
+const normalizeStatus = (s) => (s || '').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 function ComparisonContent({ post }) {
     const [view, setView] = useState('new'); // 'old' or 'new'
     
     const oldFiles = post.postagem || [];
     const newFiles = post.revisaoFiles || [];
     const currentFiles = view === 'new' ? newFiles : oldFiles;
+    const statusUpper = normalizeStatus(post.status);
     const statusUpper = (post.status || '').toUpperCase();
 
     return (
@@ -95,8 +98,9 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
     const getPendingPosts = () => {
         return posts
             .filter(p => {
-                const s = (p.status || '').toUpperCase();
-                return s === 'EM APROVAÇÃO CLIENTE' || s === 'REVISADO AG. APROVAÇÃO';
+                const s = normalizeStatus(p.status);
+                // Busca por qualquer variação de "EM APROVAÇÃO" ou "REVISADO"
+                return s.startsWith('EM APROVACAO') || s === 'REVISADO AG. APROVACAO';
             })
             .sort((a, b) => {
                 if (!a.dataPostagem) return 1;
@@ -209,7 +213,8 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
                 </div>
             </div>
         );
-    }
+    // Se estiver no modo Wizard
+    if (wizardIndex >= 0 && wizardPosts[wizardIndex]) {
         const currentPost = wizardPosts[wizardIndex];
         return (
             <div style={{ background: '#f7fafc', minHeight: '100vh' }}>
