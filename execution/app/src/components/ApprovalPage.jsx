@@ -23,6 +23,8 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
             metadata={metadata}
             onPostClick={setPreviewPost}
             onBack={onBack}
+            onApprove={onApprove}
+            onRevision={onRevision}
         />
     );
 }

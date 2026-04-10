@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { CheckCircle, ShieldCheck, MessageSquareText, ChevronLeft, Images, PlayCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { CheckCircle, ShieldCheck, MessageSquareText, ChevronLeft, Images, PlayCircle, X, ChevronRight, Send, AlertCircle, ClipboardList } from 'lucide-react';
 import FilePreview from './FilePreview';
 
 function useBreakpointValue(values) {
@@ -14,12 +14,57 @@ function useBreakpointValue(values) {
     return val;
 }
 
-export default function ApprovalGridView({ posts, metadata, onPostClick, onBack }) {
+export default function ApprovalGridView({ posts, metadata, onPostClick, onBack, onApprove, onRevision }) {
     const iconSize = useBreakpointValue({ base: 14, md: 20 });
     const statusIconSize = useBreakpointValue({ base: 10, md: 18 });
 
     const [filterMonth, setFilterMonth] = useState('all');
     const [visibleMonthLimit, setVisibleMonthLimit] = useState(1);
+
+    // Popup de revisão
+    const [revisaoPost, setRevisaoPost] = useState(null);
+    const [revisaoIdx, setRevisaoIdx] = useState(0);
+    const [revisionOpen, setRevisionOpen] = useState(false);
+    const [revisionCategories, setRevisionCategories] = useState([]);
+    const [revisionText, setRevisionText] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const openRevisaoPopup = (post, e) => {
+        e.stopPropagation();
+        setRevisaoPost(post);
+        setRevisaoIdx(0);
+        setRevisionOpen(false);
+        setRevisionCategories([]);
+        setRevisionText('');
+    };
+
+    const handleApprove = async () => {
+        if (!revisaoPost || !onApprove) return;
+        setIsSubmitting(true);
+        try {
+            await onApprove(revisaoPost.id, 'Aprovado');
+            setRevisaoPost(null);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleRevisionSubmit = async () => {
+        if (!revisionText.trim() && revisionCategories.length === 0) return;
+        setIsSubmitting(true);
+        try {
+            await onRevision(revisaoPost.id, revisionCategories, revisionText);
+            setRevisaoPost(null);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const toggleCategory = (cat) => {
+        setRevisionCategories(prev =>
+            prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+        );
+    };
 
     const sorted = [...posts].sort((a, b) => {
         if (!a.dataPostagem) return 1;
@@ -238,7 +283,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                 )}
 
                                 {/* Máscara Escura para Destaque */}
-                                {(post.status === 'Aprovado' || post.status === 'Revisão') && (
+                                {(post.status === 'Aprovado' || post.status === 'Revisão' || post.status === 'Revisado Ag. aprovação') && (
                                     <div style={{
                                         position: 'absolute', inset: 0,
                                         background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.7) 100%)',
@@ -246,7 +291,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                     }} />
                                 )}
 
-                                {/* Status text label (Botton Left) */}
+                                {/* Status text label (Bottom Left) */}
                                 <div style={{
                                     position: 'absolute',
                                     bottom: window.innerWidth >= 768 ? '12px' : '8px',
@@ -280,6 +325,26 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                             </span>
                                         </div>
                                     )}
+                                    {post.status === 'Revisado Ag. aprovação' && (
+                                        <button
+                                            onClick={(e) => openRevisaoPopup(post, e)}
+                                            style={{
+                                                background: 'rgba(249,115,22,0.95)', padding: '6px 12px',
+                                                borderRadius: '6px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                                                color: 'white', display: 'flex', alignItems: 'center', gap: '6px',
+                                                border: '1px solid #ea580c', backdropFilter: 'blur(4px)',
+                                                cursor: 'pointer', fontFamily: 'inherit',
+                                                transition: 'all 0.2s',
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(234,88,12,0.98)'}
+                                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(249,115,22,0.95)'}
+                                        >
+                                            <ClipboardList size={14} color="white" />
+                                            <span style={{ fontSize: window.innerWidth >= 768 ? '12px' : '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                Ver Revisão
+                                            </span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -303,6 +368,227 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack 
                                 >
                                     Ver próximo mês
                                 </button>
+                            </div>
+                        )}
+
+                        {/* ===== POPUP DE REVISÃO ===== */}
+                        {revisaoPost && (
+                            <div style={{
+                                position: 'fixed', inset: 0, zIndex: 3000,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                padding: '16px',
+                            }}>
+                                {/* Backdrop */}
+                                <div
+                                    onClick={() => { setRevisaoPost(null); setRevisionOpen(false); }}
+                                    style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)' }}
+                                />
+
+                                <div style={{
+                                    position: 'relative', zIndex: 1,
+                                    width: '100%', maxWidth: '520px',
+                                    background: 'white', borderRadius: '20px',
+                                    boxShadow: '0 30px 80px rgba(0,0,0,0.4)',
+                                    overflow: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column',
+                                }}>
+                                    {/* Header */}
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                        padding: '16px 20px',
+                                        background: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)',
+                                        borderBottom: '1px solid #fed7aa', flexShrink: 0,
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <ClipboardList size={18} color="#c2410c" />
+                                            <div>
+                                                <span style={{ fontWeight: 800, fontSize: '15px', color: '#9a3412', display: 'block' }}>
+                                                    Revisão Concluída
+                                                </span>
+                                                <span style={{ fontSize: '11px', color: '#c2410c', fontWeight: 500 }}>
+                                                    {revisaoPost.name}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => { setRevisaoPost(null); setRevisionOpen(false); }}
+                                            style={{
+                                                width: '30px', height: '30px', border: 'none',
+                                                background: 'rgba(0,0,0,0.06)', borderRadius: '50%',
+                                                cursor: 'pointer', display: 'flex', alignItems: 'center',
+                                                justifyContent: 'center', color: '#9a3412',
+                                            }}
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+
+                                    <div style={{ overflowY: 'auto', flex: 1 }}>
+                                        {/* Imagens de Revisão */}
+                                        {revisaoPost.revisaoFiles?.length > 0 && (
+                                            <div style={{ position: 'relative', background: '#111' }}>
+                                                <div style={{
+                                                    width: '100%', aspectRatio: '1 / 1',
+                                                    maxHeight: '320px', overflow: 'hidden',
+                                                }}>
+                                                    <FilePreview
+                                                        file={revisaoPost.revisaoFiles[revisaoIdx]}
+                                                        height="100%"
+                                                        objectFit="contain"
+                                                    />
+                                                </div>
+                                                {revisaoPost.revisaoFiles.length > 1 && (
+                                                    <>
+                                                        <div style={{
+                                                            position: 'absolute', top: '10px', right: '10px',
+                                                            background: 'rgba(0,0,0,0.6)', color: 'white',
+                                                            padding: '3px 8px', borderRadius: '999px',
+                                                            fontSize: '11px', fontWeight: 700,
+                                                        }}>
+                                                            {revisaoIdx + 1} / {revisaoPost.revisaoFiles.length}
+                                                        </div>
+                                                        <button onClick={() => setRevisaoIdx(i => i > 0 ? i - 1 : revisaoPost.revisaoFiles.length - 1)} style={{
+                                                            position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)',
+                                                            width: '32px', height: '32px', borderRadius: '50%', border: 'none',
+                                                            background: 'rgba(255,255,255,0.85)', cursor: 'pointer',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        }}><ChevronLeft size={18} /></button>
+                                                        <button onClick={() => setRevisaoIdx(i => i < revisaoPost.revisaoFiles.length - 1 ? i + 1 : 0)} style={{
+                                                            position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                                                            width: '32px', height: '32px', borderRadius: '50%', border: 'none',
+                                                            background: 'rgba(255,255,255,0.85)', cursor: 'pointer',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        }}><ChevronRight size={18} /></button>
+                                                    </>
+                                                )}
+                                                {/* Thumbnails */}
+                                                {revisaoPost.revisaoFiles.length > 1 && (
+                                                    <div style={{ display: 'flex', gap: '6px', padding: '10px 14px', background: '#1a1a1a', overflowX: 'auto' }}>
+                                                        {revisaoPost.revisaoFiles.map((f, i) => (
+                                                            <button key={i} onClick={() => setRevisaoIdx(i)} style={{
+                                                                flexShrink: 0, width: '48px', height: '48px',
+                                                                borderRadius: '6px', overflow: 'hidden',
+                                                                border: 'none', cursor: 'pointer', padding: 0,
+                                                                outline: revisaoIdx === i ? '2.5px solid #f97316' : '2px solid transparent',
+                                                                opacity: revisaoIdx === i ? 1 : 0.55,
+                                                            }}>
+                                                                <FilePreview file={f} height="48px" objectFit="cover" disableViewer />
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Feedback do Cliente */}
+                                        {revisaoPost.alteracoesSolicitadas && (
+                                            <div style={{ padding: '16px 20px', borderBottom: '1px solid #f3f4f6' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#6b7280', marginBottom: '8px' }}>
+                                                    <MessageSquareText size={14} />
+                                                    <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Feedback do Cliente</span>
+                                                </div>
+                                                <p style={{
+                                                    margin: 0, fontSize: '14px', lineHeight: 1.6,
+                                                    color: '#374151', background: '#fafafa',
+                                                    padding: '12px', borderRadius: '8px',
+                                                    border: '1px solid #e5e7eb', whiteSpace: 'pre-wrap',
+                                                }}>
+                                                    {revisaoPost.alteracoesSolicitadas}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Botões de Ação */}
+                                        {!revisionOpen ? (
+                                            <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                <button
+                                                    onClick={handleApprove}
+                                                    disabled={isSubmitting}
+                                                    style={{
+                                                        width: '100%', padding: '14px',
+                                                        border: 'none', borderRadius: '12px',
+                                                        background: 'linear-gradient(135deg, #B5A8FF 0%, #9f91f5 100%)',
+                                                        color: 'white', fontSize: '15px', fontWeight: 700,
+                                                        cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                                        opacity: isSubmitting ? 0.7 : 1,
+                                                        boxShadow: '0 4px 6px rgba(181,168,255,0.3)',
+                                                    }}
+                                                >
+                                                    <CheckCircle size={18} /> Aprovar Conteúdo
+                                                </button>
+                                                <button
+                                                    onClick={() => setRevisionOpen(true)}
+                                                    disabled={isSubmitting}
+                                                    style={{
+                                                        width: '100%', padding: '12px',
+                                                        borderRadius: '12px', border: '2px solid #f97316',
+                                                        background: 'transparent', color: '#f97316',
+                                                        fontSize: '14px', fontWeight: 600,
+                                                        cursor: 'pointer',
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                                    }}
+                                                >
+                                                    <AlertCircle size={18} /> Solicitar Nova Revisão
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            /* Formulário de nova revisão */
+                                            <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                                <div>
+                                                    <span style={{ fontSize: '13px', fontWeight: 700, display: 'block', marginBottom: '10px' }}>O que deseja revisar?</span>
+                                                    <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                                                        {['Legenda', 'Conteúdo', 'Data'].map(cat => (
+                                                            <label key={cat} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontSize: '14px' }}>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={revisionCategories.includes(cat)}
+                                                                    onChange={() => toggleCategory(cat)}
+                                                                    style={{ accentColor: '#f97316' }}
+                                                                />
+                                                                {cat}
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label style={{ fontSize: '13px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Feedback</label>
+                                                    <textarea
+                                                        placeholder="Descreva os ajustes desejados..."
+                                                        value={revisionText}
+                                                        onChange={e => setRevisionText(e.target.value)}
+                                                        style={{
+                                                            width: '100%', minHeight: '100px', padding: '12px',
+                                                            border: '1px solid #e5e7eb', borderRadius: '10px',
+                                                            background: '#f9fafb', fontSize: '14px',
+                                                            fontFamily: 'inherit', resize: 'vertical', outline: 'none',
+                                                            boxSizing: 'border-box',
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                                                    <button onClick={() => setRevisionOpen(false)} style={{
+                                                        padding: '8px 18px', border: 'none', background: 'transparent',
+                                                        fontSize: '14px', fontWeight: 600, cursor: 'pointer', color: '#6b7280',
+                                                        borderRadius: '8px',
+                                                    }}>Cancelar</button>
+                                                    <button
+                                                        onClick={handleRevisionSubmit}
+                                                        disabled={isSubmitting}
+                                                        style={{
+                                                            display: 'flex', alignItems: 'center', gap: '6px',
+                                                            padding: '10px 22px', border: 'none', borderRadius: '10px',
+                                                            background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+                                                            color: 'white', fontSize: '14px', fontWeight: 600,
+                                                            cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1,
+                                                        }}
+                                                    >
+                                                        <Send size={14} /> Enviar Feedback
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>

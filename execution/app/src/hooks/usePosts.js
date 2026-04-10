@@ -137,6 +137,7 @@ export function usePosts(apiToken, boardId) {
                         desenvolvimento: '',
                         postagem: [],
                         revisaoFiles: [],
+                        alteracoesSolicitadas: '',
                         dataPostagem: null
                     };
 
@@ -190,6 +191,10 @@ export function usePosts(apiToken, boardId) {
                         } else if (cv.id === cols.revisaoFiles) {
                             if (Array.isArray(val)) {
                                 post.revisaoFiles = val;
+                            }
+                        } else if (cv.id === cols.revisao) {
+                            if (typeof val === 'string' && val.trim()) {
+                                post.alteracoesSolicitadas = val;
                             }
                         }
                     });

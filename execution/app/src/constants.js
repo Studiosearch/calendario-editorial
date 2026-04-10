@@ -11,6 +11,7 @@ export const STATUS_COLORS = {
     "Em Aprovação Cliente": "#007eb5",
     "Em produção": "#fdab3d",
     "Revisão": "#ffcb00",
+    "Revisado Ag. aprovação": "#f97316",
     // Desenvolvimento
     "Design": "#007eb5",
     "Inspirações": "#c4c4c4",
@@ -32,6 +33,7 @@ export const STATUS_OPTIONS = [
     { label: "Em Aprovação Studio", value: "Em Aprovação Studio" },
     { label: "Aprovado", value: "Aprovado" },
     { label: "Revisão", value: "Revisão" },
+    { label: "Revisado Ag. aprovação", value: "Revisado Ag. aprovação" },
     { label: "Agendado", value: "Agendado" },
     { label: "Agendado MLABS", value: "Agendado MLABS" },
     { label: "Concluído", value: "Concluído" },
