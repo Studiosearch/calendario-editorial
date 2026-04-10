@@ -97,60 +97,102 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                 }}>
                     {/* Images Carousel */}
                     <div style={{ position: 'relative' }}>
+                        {/* Botão Comparar Criativos */}
+                        {post.status === 'Revisado Ag. aprovação' && post.revisaoFiles?.length > 0 && post.postagem?.length > 0 && (
+                            <button 
+                                onClick={() => window.dispatchEvent(new CustomEvent('open-compare', { detail: post }))}
+                                style={{
+                                    position: 'absolute', top: '16px', left: '16px', zIndex: 30,
+                                    padding: '8px 16px', borderRadius: '12px', border: 'none',
+                                    background: 'rgba(255,255,255,0.9)', color: '#B5A8FF',
+                                    fontWeight: 800, fontSize: '12px', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)'
+                                }}
+                            >
+                                <ClipboardList size={14} />
+                                Comparar Criativos
+                            </button>
+                        )}
+
+                        {/* Indicador de Versão */}
+                        <div style={{
+                            position: 'absolute', top: '16px', right: '16px', zIndex: 30,
+                            background: 'rgba(0,0,0,0.5)', color: 'white', padding: '4px 12px',
+                            borderRadius: '20px', fontSize: '10px', fontWeight: 800, backdropFilter: 'blur(4px)'
+                        }}>
+                            {post.status === 'Revisado Ag. aprovação' ? 'VERSÃO REVISADA' : 'VERSÃO ORIGINAL'}
+                        </div>
+
                         <div ref={carouselRef} style={{
                             display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory',
                             background: '#000', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
                         }}>
-                            {post.postagem?.length > 0 ? (
-                                post.postagem.map((file, idx) => (
-                                    <div key={idx} style={{
-                                        minWidth: '100%', aspectRatio: '1080 / 1350',
-                                        position: 'relative', scrollSnapAlign: 'start',
-                                    }}>
-                                        <FilePreview file={file} height="100%" objectFit="contain" />
-                                        {post.postagem.length > 1 && (
-                                            <div style={{
-                                                position: 'absolute', top: '16px', right: '16px',
-                                                background: 'rgba(0,0,0,0.6)', color: 'white',
-                                                padding: '4px 10px', borderRadius: '999px',
-                                                fontSize: '11px', fontWeight: 700, backdropFilter: 'blur(4px)',
-                                                pointerEvents: 'none', border: '1px solid rgba(255,255,255,0.2)', zIndex: 20
-                                            }}>
-                                                {idx + 1} / {post.postagem.length}
-                                            </div>
-                                        )}
+                            {(() => {
+                                const mediaFiles = (post.status === 'Revisado Ag. aprovação' && post.revisaoFiles?.length > 0) 
+                                    ? post.revisaoFiles 
+                                    : post.postagem;
+
+                                if (mediaFiles?.length > 0) {
+                                    return mediaFiles.map((file, idx) => (
+                                        <div key={idx} style={{
+                                            minWidth: '100%', aspectRatio: '1080 / 1350',
+                                            position: 'relative', scrollSnapAlign: 'start',
+                                        }}>
+                                            <FilePreview file={file} height="100%" objectFit="contain" />
+                                            {mediaFiles.length > 1 && (
+                                                <div style={{
+                                                    position: 'absolute', bottom: '16px', right: '16px',
+                                                    background: 'rgba(0,0,0,0.6)', color: 'white',
+                                                    padding: '4px 10px', borderRadius: '999px',
+                                                    fontSize: '11px', fontWeight: 700, backdropFilter: 'blur(4px)',
+                                                    pointerEvents: 'none', border: '1px solid rgba(255,255,255,0.2)', zIndex: 20
+                                                }}>
+                                                    {idx + 1} / {mediaFiles.length}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ));
+                                }
+                                return (
+                                    <div style={{ minWidth: '100%', aspectRatio: '1080 / 1350', borderBottom: '1px solid #2d3748', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>Arte em desenvolvimento</span>
                                     </div>
-                                ))
-                            ) : (
-                                <div style={{ minWidth: '100%', aspectRatio: '1080 / 1350', borderBottom: '1px solid #2d3748', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>Arte em desenvolvimento</span>
-                                </div>
-                            )}
+                                );
+                            })()}
                         </div>
 
                         {/* Navigation Arrows */}
-                        {post.postagem?.length > 1 && (
-                            <>
-                                <button onClick={(e) => { e.preventDefault(); scrollCarousel(-1); }} style={{
-                                    position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)',
-                                    width: '36px', height: '36px', borderRadius: '50%', border: 'none',
-                                    background: 'rgba(255,255,255,0.85)', color: '#1a202c', cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 10, backdropFilter: 'blur(4px)'
-                                }}>
-                                    <ChevronLeft size={20} />
-                                </button>
-                                <button onClick={(e) => { e.preventDefault(); scrollCarousel(1); }} style={{
-                                    position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
-                                    width: '36px', height: '36px', borderRadius: '50%', border: 'none',
-                                    background: 'rgba(255,255,255,0.85)', color: '#1a202c', cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 10, backdropFilter: 'blur(4px)'
-                                }}>
-                                    <ChevronRight size={20} />
-                                </button>
-                            </>
-                        )}
+                        {(() => {
+                            const mediaFiles = (post.status === 'Revisado Ag. aprovação' && post.revisaoFiles?.length > 0) 
+                                ? post.revisaoFiles 
+                                : post.postagem;
+                            
+                            if (!mediaFiles || mediaFiles.length <= 1) return null;
+
+                            return (
+                                <>
+                                    <button onClick={(e) => { e.preventDefault(); scrollCarousel(-1); }} style={{
+                                        position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)',
+                                        width: '36px', height: '36px', borderRadius: '50%', border: 'none',
+                                        background: 'rgba(255,255,255,0.85)', color: '#1a202c', cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 10, backdropFilter: 'blur(4px)'
+                                    }}>
+                                        <ChevronLeft size={20} />
+                                    </button>
+                                    <button onClick={(e) => { e.preventDefault(); scrollCarousel(1); }} style={{
+                                        position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                                        width: '36px', height: '36px', borderRadius: '50%', border: 'none',
+                                        background: 'rgba(255,255,255,0.85)', color: '#1a202c', cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)', zIndex: 10, backdropFilter: 'blur(4px)'
+                                    }}>
+                                        <ChevronRight size={20} />
+                                    </button>
+                                </>
+                            );
+                        })()}
                     </div>
 
                     {/* Details */}

@@ -225,54 +225,85 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                     e.currentTarget.style.transform = 'translateY(0)';
                                 }}
                             >
-                                {post.postagem?.[0] ? (
-                                    <FilePreview file={post.postagem[0]} height="100%" objectFit="cover" disableViewer />
-                                ) : (
-                                    <div style={{
-                                        height: '100%', display: 'flex', flexDirection: 'column',
-                                        alignItems: 'center', justifyContent: 'center',
-                                        background: 'rgba(255,255,255,0.4)',
-                                        position: 'relative'
-                                    }}>
+                                {(() => {
+                                    const isRevised = post.status === 'Revisado Ag. aprovação';
+                                    const hasRevisedFiles = post.revisaoFiles?.length > 0;
+                                    const displayFile = (isRevised && hasRevisedFiles) ? post.revisaoFiles[0] : post.postagem?.[0];
+
+                                    if (displayFile) {
+                                        return (
+                                            <>
+                                                <FilePreview file={displayFile} height="100%" objectFit="cover" disableViewer />
+                                                {isRevised && hasRevisedFiles && (
+                                                    <div style={{
+                                                        position: 'absolute', top: '12px', left: '12px', zIndex: 30,
+                                                        background: 'rgba(181, 168, 255, 0.95)', color: 'white',
+                                                        padding: '4px 10px', borderRadius: '6px', fontSize: '10px',
+                                                        fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px',
+                                                        boxShadow: '0 4px 10px rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)',
+                                                        border: '1px solid rgba(255,255,255,0.2)'
+                                                    }}>
+                                                        Versão Revisada
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    }
+
+                                    return (
                                         <div style={{
-                                            position: 'absolute', inset: 0,
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            background: 'rgba(255,255,255,0.2)',
-                                            backdropFilter: 'blur(2px)'
+                                            height: '100%', display: 'flex', flexDirection: 'column',
+                                            alignItems: 'center', justifyContent: 'center',
+                                            background: 'rgba(255,255,255,0.4)',
+                                            position: 'relative'
                                         }}>
-                                            <span style={{
-                                                fontSize: window.innerWidth >= 768 ? '24px' : '16px',
-                                                color: '#B5A8FF', fontWeight: 900,
-                                                textTransform: 'uppercase', letterSpacing: '2px',
-                                                fontFamily: "'Gastromond', 'Playfair Display', serif",
-                                                opacity: 0.8
+                                            <div style={{
+                                                position: 'absolute', inset: 0,
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                background: 'rgba(255,255,255,0.2)',
+                                                backdropFilter: 'blur(2px)'
                                             }}>
-                                                Coming Soon
+                                                <span style={{
+                                                    fontSize: window.innerWidth >= 768 ? '24px' : '16px',
+                                                    color: '#B5A8FF', fontWeight: 900,
+                                                    textTransform: 'uppercase', letterSpacing: '2px',
+                                                    fontFamily: "'Gastromond', 'Playfair Display', serif",
+                                                    opacity: 0.8
+                                                }}>
+                                                    Coming Soon
+                                                </span>
+                                            </div>
+                                            <span style={{
+                                                fontSize: window.innerWidth >= 768 ? '12px' : '10px',
+                                                color: '#4a5568', fontWeight: 600,
+                                                marginTop: '60%', padding: '0 8px'
+                                            }}>
+                                                {post.name}
                                             </span>
                                         </div>
-                                        <span style={{
-                                            fontSize: window.innerWidth >= 768 ? '12px' : '10px',
-                                            color: '#4a5568', fontWeight: 600,
-                                            marginTop: '60%', padding: '0 8px'
-                                        }}>
-                                            {post.name}
-                                        </span>
-                                    </div>
-                                )}
+                                    );
+                                })()}
 
-                                {/* Right Top Media Indicators */}
-                                <div style={{
-                                    position: 'absolute', top: '8px', right: '8px',
-                                    display: 'flex', flexDirection: 'column', gap: '8px', zIndex: 10
-                                }}>
-                                    {post.postagem?.length > 1 && (
-                                        <div style={{
-                                            background: 'rgba(0,0,0,0.6)', padding: '6px',
-                                            borderRadius: '50%', color: 'white', backdropFilter: 'blur(4px)',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                        }}>
-                                            <Images size={14} />
-                                        </div>
+                                    {isRevised && hasRevisedFiles && post.postagem?.length > 0 && (
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                window.dispatchEvent(new CustomEvent('open-compare', { detail: post }));
+                                            }}
+                                            style={{
+                                                background: 'rgba(255,255,255,0.95)', padding: '6px 12px',
+                                                borderRadius: '8px', color: '#B5A8FF', border: 'none',
+                                                fontSize: '10px', fontWeight: 900, cursor: 'pointer',
+                                                display: 'flex', alignItems: 'center', gap: '6px',
+                                                boxShadow: '0 4px 12px rgba(0,0,0,0.2)', transition: 'all 0.2s',
+                                                backdropFilter: 'blur(4px)'
+                                            }}
+                                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                                        >
+                                            <ClipboardList size={12} />
+                                            Comparar
+                                        </button>
                                     )}
                                 </div>
 

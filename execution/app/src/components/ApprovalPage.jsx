@@ -1,7 +1,86 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle, X } from 'lucide-react';
+import { AlertCircle, CheckCircle, X, ChevronLeft, ChevronRight, ClipboardList, ShieldCheck } from 'lucide-react';
 import ApprovalGridView from './ApprovalGridView';
 import ApprovalDetailView from './ApprovalDetailView';
+import FilePreview from './FilePreview';
+
+function ComparisonContent({ post }) {
+    const [view, setView] = useState('new'); // 'old' or 'new'
+    
+    const oldFiles = post.postagem || [];
+    const newFiles = post.revisaoFiles || [];
+    const currentFiles = view === 'new' ? newFiles : oldFiles;
+
+    return (
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            {/* Toggle Switch */}
+            <div style={{ padding: '20px', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ 
+                    background: 'rgba(255,255,255,0.1)', padding: '4px', borderRadius: '12px', 
+                    display: 'flex', width: '100%', maxWidth: '300px', border: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                    <button 
+                        onClick={() => setView('old')}
+                        style={{
+                            flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
+                            background: view === 'old' ? '#B5A8FF' : 'transparent',
+                            color: 'white', fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        Original (Antes)
+                    </button>
+                    <button 
+                        onClick={() => setView('new')}
+                        style={{
+                            flex: 1, padding: '10px', borderRadius: '8px', border: 'none',
+                            background: view === 'new' ? '#B5A8FF' : 'transparent',
+                            color: 'white', fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        Revisada (Depois)
+                    </button>
+                </div>
+            </div>
+
+            {/* Media View */}
+            <div style={{ flex: 1, background: '#000', position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <div style={{ width: '100%', aspectRatio: '1080 / 1350', overflow: 'hidden' }}>
+                    {currentFiles.length > 0 ? (
+                        <div style={{ display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory', height: '100%' }}>
+                            {currentFiles.map((file, idx) => (
+                                <div key={idx} style={{ minWidth: '100%', height: '100%', scrollSnapAlign: 'start' }}>
+                                    <FilePreview file={file} height="100%" objectFit="contain" />
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#718096' }}>
+                            Sem arquivos nesta versão
+                        </div>
+                    )}
+                </div>
+                
+                {/* Overlay Infos */}
+                <div style={{ 
+                    position: 'absolute', bottom: '20px', left: '20px', right: '20px',
+                    padding: '12px', borderRadius: '12px', background: 'rgba(0,0,0,0.6)',
+                    backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', color: '#B5A8FF', fontWeight: 800 }}>
+                            {view === 'new' ? 'VERSÃO FINAL REVISADA' : 'VERSÃO ORIGINAL ENVIADA'}
+                        </span>
+                        <span style={{ fontSize: '11px', color: '#cbd5e0' }}>
+                            {currentFiles.length} item(s)
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRevision }) {
     const [previewPost, setPreviewPost] = useState(null);
@@ -22,23 +101,35 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
             });
     };
 
+    const [comparePost, setComparePost] = useState(null);
+
     // Ao carregar, verifica se tem pendências para mostrar o Welcome
     useEffect(() => {
-        const pending = getPendingPosts();
-        if (pending.length > 0) {
-            setShowWelcome(true);
-            setWizardPosts(pending);
+        if (posts.length > 0) {
+            const pending = getPendingPosts();
+            if (pending.length > 0) {
+                // Só mostra o welcome se o wizard não estiver ativo e não estivermos vendo um post já
+                if (wizardIndex === -1 && !previewPost && !showSuccessModal) {
+                    setShowWelcome(true);
+                    setWizardPosts(pending);
+                }
+            }
         }
-    }, [posts.length]);
+    }, [posts]); // Re-calcula se a lista de posts mudar (raso)
 
     // Restaurar scroll ao fechar o post
     useEffect(() => {
-        if (!previewPost && wizardIndex === -1 && lastScrollY > 0) {
-            setTimeout(() => {
+        // Se voltamos para o grid e temos um scroll salvo
+        if (!previewPost && wizardIndex === -1 && !comparePost && lastScrollY > 0) {
+            // Tentativa imediata e uma com delay para boards pesados
+            window.scrollTo({ top: lastScrollY, behavior: 'instant' });
+            
+            const timer = setTimeout(() => {
                 window.scrollTo({ top: lastScrollY, behavior: 'instant' });
-            }, 50);
+            }, 100);
+            return () => clearTimeout(timer);
         }
-    }, [previewPost, wizardIndex, lastScrollY]);
+    }, [previewPost, wizardIndex, comparePost]);
 
     const startWizard = () => {
         setShowWelcome(false);
@@ -61,10 +152,60 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
         setPreviewPost(post);
     };
 
+    // Ouvir evento de comparação
+    useEffect(() => {
+        const handleOpenCompare = (e) => {
+            setLastScrollY(window.scrollY);
+            setComparePost(e.detail);
+        };
+        window.addEventListener('open-compare', handleOpenCompare);
+        return () => window.removeEventListener('open-compare', handleOpenCompare);
+    }, []);
+
     // --- RENDERS CONDICIONAIS APÓS OS HOOKS ---
 
-    // Se estiver no modo Wizard
-    if (wizardIndex >= 0 && wizardPosts[wizardIndex]) {
+    // Modal de Comparação
+    if (comparePost) {
+        return (
+            <div style={{
+                position: 'fixed', inset: 0, zIndex: 7000,
+                background: '#1a202c', color: 'white', display: 'flex', flexDirection: 'column'
+            }}>
+                <div style={{
+                    padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                }}>
+                    <button onClick={() => setComparePost(null)} style={{
+                        background: 'transparent', border: 'none', color: 'white', cursor: 'pointer'
+                    }}>
+                        <ChevronLeft size={24} />
+                    </button>
+                    <div style={{ textAlign: 'center' }}>
+                        <h3 style={{ fontSize: '15px', fontWeight: 800 }}>Comparar Criativos</h3>
+                        <p style={{ fontSize: '11px', color: '#a0aec0' }}>{comparePost.name}</p>
+                    </div>
+                    <div style={{ width: '24px' }} />
+                </div>
+
+                <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+                    <ComparisonContent post={comparePost} />
+                </div>
+
+                <div style={{ padding: '24px', background: 'rgba(0,0,0,0.5)', textAlign: 'center' }}>
+                    <button 
+                        onClick={() => setComparePost(null)}
+                        style={{
+                            width: '100%', maxWidth: '300px', padding: '16px', borderRadius: '12px',
+                            border: 'none', background: '#B5A8FF', color: 'white', fontWeight: 800,
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Fechar Comparação
+                    </button>
+                </div>
+            </div>
+        );
+    }
         const currentPost = wizardPosts[wizardIndex];
         return (
             <div style={{ background: '#f7fafc', minHeight: '100vh' }}>
