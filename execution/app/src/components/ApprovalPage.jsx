@@ -10,6 +10,7 @@ function ComparisonContent({ post }) {
     const oldFiles = post.postagem || [];
     const newFiles = post.revisaoFiles || [];
     const currentFiles = view === 'new' ? newFiles : oldFiles;
+    const statusUpper = (post.status || '').toUpperCase();
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -93,7 +94,10 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
     // Identificar posts pendentes
     const getPendingPosts = () => {
         return posts
-            .filter(p => p.status === 'Em Aprovação Cliente' || p.status === 'Revisado Ag. aprovação')
+            .filter(p => {
+                const s = (p.status || '').toUpperCase();
+                return s === 'EM APROVAÇÃO CLIENTE' || s === 'REVISADO AG. APROVAÇÃO';
+            })
             .sort((a, b) => {
                 if (!a.dataPostagem) return 1;
                 if (!b.dataPostagem) return -1;

@@ -226,7 +226,8 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                 }}
                             >
                                 {(() => {
-                                    const isRevised = post.status === 'Revisado Ag. aprovação';
+                                    const statusUpper = (post.status || '').toUpperCase();
+                                    const isRevised = statusUpper === 'REVISADO AG. APROVAÇÃO';
                                     const hasRevisedFiles = post.revisaoFiles?.length > 0;
                                     const displayFile = (isRevised && hasRevisedFiles) ? post.revisaoFiles[0] : post.postagem?.[0];
 
@@ -234,7 +235,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                         return (
                                             <>
                                                 <FilePreview file={displayFile} height="100%" objectFit="cover" disableViewer />
-                                                {isRevised && hasRevisedFiles && (
+                                                {isRevised && (
                                                     <div style={{
                                                         position: 'absolute', top: '12px', left: '12px', zIndex: 30,
                                                         background: 'rgba(181, 168, 255, 0.95)', color: 'white',
@@ -284,27 +285,35 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                     );
                                 })()}
 
-                                    {isRevised && hasRevisedFiles && post.postagem?.length > 0 && (
-                                        <button 
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                window.dispatchEvent(new CustomEvent('open-compare', { detail: post }));
-                                            }}
-                                            style={{
-                                                background: 'rgba(255,255,255,0.95)', padding: '6px 12px',
-                                                borderRadius: '8px', color: '#B5A8FF', border: 'none',
-                                                fontSize: '10px', fontWeight: 900, cursor: 'pointer',
-                                                display: 'flex', alignItems: 'center', gap: '6px',
-                                                boxShadow: '0 4px 12px rgba(0,0,0,0.2)', transition: 'all 0.2s',
-                                                backdropFilter: 'blur(4px)'
-                                            }}
-                                            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                                            onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-                                        >
-                                            <ClipboardList size={12} />
-                                            Comparar
-                                        </button>
-                                    )}
+                                    {(() => {
+                                        const statusUpper = (post.status || '').toUpperCase();
+                                        const isRevised = statusUpper === 'REVISADO AG. APROVAÇÃO';
+                                        const hasRevisedFiles = post.revisaoFiles?.length > 0;
+                                        if (isRevised && hasRevisedFiles && post.postagem?.length > 0) {
+                                            return (
+                                                <button 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        window.dispatchEvent(new CustomEvent('open-compare', { detail: post }));
+                                                    }}
+                                                    style={{
+                                                        background: 'rgba(255,255,255,0.95)', padding: '6px 12px',
+                                                        borderRadius: '8px', color: '#B5A8FF', border: 'none',
+                                                        fontSize: '10px', fontWeight: 900, cursor: 'pointer',
+                                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)', transition: 'all 0.2s',
+                                                        backdropFilter: 'blur(4px)'
+                                                    }}
+                                                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                                                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                                                >
+                                                    <ClipboardList size={12} />
+                                                    Comparar
+                                                </button>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
                                 </div>
 
                                 {/* Center Play Video Indicator */}
@@ -322,24 +331,37 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                 )}
 
                                 {/* Máscara de Destaque (Apenas para posts em revisão/análise interna) */}
-                                {(post.status === 'Revisão' || post.status === 'Revisado Ag. aprovação') && (
-                                    <div style={{
-                                        position: 'absolute', inset: 0,
-                                        background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.5) 100%)',
-                                        zIndex: 5, pointerEvents: 'none'
-                                    }} />
-                                )}
+                                {(() => {
+                                    const s = (post.status || '').toUpperCase();
+                                    if (s === 'REVISÃO' || s === 'REVISADO AG. APROVAÇÃO') {
+                                        return (
+                                            <div style={{
+                                                position: 'absolute', inset: 0,
+                                                background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.5) 100%)',
+                                                zIndex: 5, pointerEvents: 'none'
+                                            }} />
+                                        );
+                                    }
+                                    return null;
+                                })()}
 
                                 {/* Overlay removido conforme solicitado: Agendada agora fica nítida */}
 
                                 {/* Overlay Sutil para Aguardando Aprovação (Sem texto, apenas opacidade) */}
-                                {(!['Aprovado', 'Agendado', 'Postado', 'Revisão', 'Revisado Ag. aprovação'].includes(post.status)) && (
-                                    <div style={{
-                                        position: 'absolute', inset: 0,
-                                        background: 'rgba(0,0,0,0.45)',
-                                        zIndex: 15, pointerEvents: 'none'
-                                    }} />
-                                )}
+                                {(() => {
+                                    const s = (post.status || '').toUpperCase();
+                                    const excluded = ['APROVADO', 'AGENDADO', 'POSTADO', 'REVISÃO', 'REVISADO AG. APROVAÇÃO', 'REVISADO AG. APROVAÇÃO'];
+                                    if (!excluded.includes(s)) {
+                                        return (
+                                            <div style={{
+                                                position: 'absolute', inset: 0,
+                                                background: 'rgba(0,0,0,0.45)',
+                                                zIndex: 15, pointerEvents: 'none'
+                                            }} />
+                                        );
+                                    }
+                                    return null;
+                                })()}
 
                                 {/* Status Label (Bottom Left) */}
                                 <div style={{

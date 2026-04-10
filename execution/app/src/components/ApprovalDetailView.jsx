@@ -56,12 +56,23 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
         );
     };
 
+    const statusUpper = (post.status || '').toUpperCase();
+    const isRevised = statusUpper === 'REVISADO AG. APROVAÇÃO';
+    const mediaFiles = (isRevised && post.revisaoFiles?.length > 0) 
+        ? post.revisaoFiles 
+        : post.postagem;
+
+    const hasOriginal = post.postagem?.length > 0;
+    const hasRevised = post.revisaoFiles?.length > 0;
+    const canCompare = hasOriginal && hasRevised;
+
     return (
-        <div className="animate-slide-fade-in" style={{ background: '#f7fafc', minHeight: '100vh' }}>
+        <div className="animate-slide-fade-in" style={{ background: '#f7fafc', minHeight: '100vh', paddingBottom: '40px' }}>
             {/* Header */}
             <div style={{
                 background: 'white', borderBottom: '1px solid #e2e8f0',
                 padding: '12px 16px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                position: 'sticky', top: 0, zIndex: 100
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <button onClick={onClose} style={{
@@ -69,70 +80,56 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         color: '#718096',
                     }}>
-                        <X size={20} />
+                        <ChevronLeft size={24} />
                     </button>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#B5A8FF' }}>
-                        <ShieldCheck size={14} />
-                        <span style={{
-                            fontWeight: 700,
-                            fontSize: window.innerWidth >= 768 ? '1.1rem' : '0.75rem',
-                            whiteSpace: 'nowrap',
-                        }}>
-                            Aprovação - {metadata.boardName}
+                    <div style={{ textAlign: 'center' }}>
+                        <h1 style={{ fontSize: '15px', fontWeight: 800, color: '#1a202c', marginBottom: '2px' }}>
+                            {post.name}
+                        </h1>
+                        <span style={{ fontSize: '11px', color: '#718096', display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                            <AlertCircle size={10} /> {isRevised ? 'Visualizando Versão Revisada' : 'Visualizando Versão Original'}
                         </span>
                     </div>
+                    <div style={{ width: '32px' }} />
                 </div>
             </div>
 
-            {/* Content */}
-            <div style={{
-                display: 'flex', justifyContent: 'center',
-                padding: window.innerWidth >= 768 ? '40px 16px' : '16px',
-            }}>
-                <div style={{
-                    maxWidth: '500px', width: '100%', background: 'white',
-                    borderRadius: window.innerWidth >= 768 ? '16px' : '12px',
-                    overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
-                    border: '1px solid #e2e8f0',
-                }}>
-                    {/* Images Carousel */}
+            <div style={{ maxWidth: '600px', margin: '0 auto', padding: '0 0 40px' }}>
+                <div style={{ position: 'relative', background: '#000', borderRadius: '0 0 24px 24px', overflow: 'hidden' }}>
+                    
+                    {/* Botão Comparar Criativos (Overlay na imagem se puder comparar) */}
+                    {canCompare && (
+                        <button 
+                            onClick={() => window.dispatchEvent(new CustomEvent('open-compare', { detail: post }))}
+                            style={{
+                                position: 'absolute', top: '16px', left: '16px', zIndex: 30,
+                                padding: '8px 16px', borderRadius: '12px', border: 'none',
+                                background: 'rgba(255,255,255,0.9)', color: '#B5A8FF',
+                                fontWeight: 800, fontSize: '12px', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)'
+                            }}
+                        >
+                            <ClipboardList size={14} />
+                            Comparar Criativos
+                        </button>
+                    )}
+
+                    {/* Indicador de Versão */}
+                    <div style={{
+                        position: 'absolute', top: '16px', right: '16px', zIndex: 30,
+                        background: 'rgba(0,0,0,0.5)', color: 'white', padding: '4px 12px',
+                        borderRadius: '20px', fontSize: '10px', fontWeight: 800, backdropFilter: 'blur(4px)'
+                    }}>
+                        {isRevised ? 'VERSÃO REVISADA' : 'VERSÃO ORIGINAL'}
+                    </div>
+
                     <div style={{ position: 'relative' }}>
-                        {/* Botão Comparar Criativos */}
-                        {post.status === 'Revisado Ag. aprovação' && post.revisaoFiles?.length > 0 && post.postagem?.length > 0 && (
-                            <button 
-                                onClick={() => window.dispatchEvent(new CustomEvent('open-compare', { detail: post }))}
-                                style={{
-                                    position: 'absolute', top: '16px', left: '16px', zIndex: 30,
-                                    padding: '8px 16px', borderRadius: '12px', border: 'none',
-                                    background: 'rgba(255,255,255,0.9)', color: '#B5A8FF',
-                                    fontWeight: 800, fontSize: '12px', cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '8px',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)'
-                                }}
-                            >
-                                <ClipboardList size={14} />
-                                Comparar Criativos
-                            </button>
-                        )}
-
-                        {/* Indicador de Versão */}
-                        <div style={{
-                            position: 'absolute', top: '16px', right: '16px', zIndex: 30,
-                            background: 'rgba(0,0,0,0.5)', color: 'white', padding: '4px 12px',
-                            borderRadius: '20px', fontSize: '10px', fontWeight: 800, backdropFilter: 'blur(4px)'
-                        }}>
-                            {post.status === 'Revisado Ag. aprovação' ? 'VERSÃO REVISADA' : 'VERSÃO ORIGINAL'}
-                        </div>
-
                         <div ref={carouselRef} style={{
                             display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory',
                             background: '#000', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
                         }}>
                             {(() => {
-                                const mediaFiles = (post.status === 'Revisado Ag. aprovação' && post.revisaoFiles?.length > 0) 
-                                    ? post.revisaoFiles 
-                                    : post.postagem;
-
                                 if (mediaFiles?.length > 0) {
                                     return mediaFiles.map((file, idx) => (
                                         <div key={idx} style={{
@@ -164,10 +161,6 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
 
                         {/* Navigation Arrows */}
                         {(() => {
-                            const mediaFiles = (post.status === 'Revisado Ag. aprovação' && post.revisaoFiles?.length > 0) 
-                                ? post.revisaoFiles 
-                                : post.postagem;
-                            
                             if (!mediaFiles || mediaFiles.length <= 1) return null;
 
                             return (
@@ -194,11 +187,6 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                             );
                         })()}
                     </div>
-
-                    {/* Details */}
-                    <div style={{
-                        padding: window.innerWidth >= 768 ? '28px' : '20px',
-                        display: 'flex', flexDirection: 'column', gap: window.innerWidth >= 768 ? '20px' : '16px',
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#B5A8FF' }}>
