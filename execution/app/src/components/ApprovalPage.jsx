@@ -54,30 +54,50 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
     if (wizardIndex >= 0 && wizardPosts[wizardIndex]) {
         const currentPost = wizardPosts[wizardIndex];
         return (
-            <div style={{ position: 'relative', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+            <div style={{ background: '#f7fafc', minHeight: '100vh' }}>
+                {/* Barra de Progresso Fixed */}
                 <div style={{
-                    position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100,
-                    padding: '8px 16px', background: 'rgba(181, 168, 255, 0.95)',
-                    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    gap: '12px', backdropFilter: 'blur(8px)', boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                    position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
+                    padding: '10px 16px', background: 'rgba(181, 168, 255, 0.98)',
+                    color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    backdropFilter: 'blur(10px)', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    borderBottom: '1px solid rgba(255,255,255,0.2)'
                 }}>
-                    <span style={{ fontSize: '14px', fontWeight: 800, textTransform: 'uppercase' }}>
-                        Modo de Aprovação ({wizardIndex + 1} de {wizardPosts.length})
+                    <div style={{ width: '32px' }} /> {/* Spacer */}
+                    <span style={{ fontSize: '13px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        Modo de Aprovação ({wizardIndex + 1} / {wizardPosts.length})
                     </span>
+                    <button 
+                        onClick={() => { setWizardIndex(-1); setWizardPosts([]); }}
+                        style={{
+                            width: '32px', height: '32px', borderRadius: '50%', border: 'none',
+                            background: 'rgba(255,255,255,0.2)', color: 'white', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                    >
+                        <X size={18} />
+                    </button>
                 </div>
-                <ApprovalDetailView
-                    post={currentPost}
-                    metadata={metadata}
-                    onClose={() => { setWizardIndex(-1); setWizardPosts([]); }}
-                    onApprove={async (id, status) => {
-                        await onApprove(id, status);
-                        handleNextInWizard();
-                    }}
-                    onRevision={async (id, cats, text) => {
-                        await onRevision(id, cats, text);
-                        handleNextInWizard();
-                    }}
-                />
+
+                {/* Padding para não ficar sob a barra fixed */}
+                <div style={{ paddingTop: '45px' }}>
+                    <ApprovalDetailView
+                        post={currentPost}
+                        metadata={metadata}
+                        onClose={() => { setWizardIndex(-1); setWizardPosts([]); }}
+                        onApprove={async (id, status) => {
+                            await onApprove(id, status);
+                            handleNextInWizard();
+                        }}
+                        onRevision={async (id, cats, text) => {
+                            await onRevision(id, cats, text);
+                            handleNextInWizard();
+                        }}
+                    />
+                </div>
             </div>
         );
     }
