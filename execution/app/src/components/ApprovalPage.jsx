@@ -102,6 +102,23 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
         );
     }
 
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    // Restaurar scroll ao fechar o post
+    useEffect(() => {
+        if (!previewPost && wizardIndex === -1 && lastScrollY > 0) {
+            // Pequeno timeout para garantir que o grid rendenrizou
+            setTimeout(() => {
+                window.scrollTo({ top: lastScrollY, behavior: 'instant' });
+            }, 50);
+        }
+    }, [previewPost, wizardIndex]);
+
+    const handleOpenPost = (post) => {
+        setLastScrollY(window.scrollY);
+        setPreviewPost(post);
+    };
+
     if (previewPost) {
         return (
             <ApprovalDetailView
@@ -119,7 +136,7 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
             <ApprovalGridView
                 posts={posts}
                 metadata={metadata}
-                onPostClick={setPreviewPost}
+                onPostClick={handleOpenPost}
                 onBack={onBack}
                 onApprove={onApprove}
                 onRevision={onRevision}

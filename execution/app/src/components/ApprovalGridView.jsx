@@ -290,7 +290,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                     </div>
                                 )}
 
-                                {/* Máscara Escura para Destaque */}
+                                {/* Máscara Escura para Destaque (Aprovados e Revisão) */}
                                 {(post.status === 'Aprovado' || post.status === 'Revisão' || post.status === 'Revisado Ag. aprovação') && (
                                     <div style={{
                                         position: 'absolute', inset: 0,
@@ -299,41 +299,50 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                     }} />
                                 )}
 
-                                {/* Status text label (Bottom Left) */}
+                                {/* Overlay "Agendada" */}
+                                {post.status === 'Agendado' && (
+                                    <div style={{
+                                        position: 'absolute', inset: 0,
+                                        background: 'rgba(0,0,0,0.65)',
+                                        zIndex: 15, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        padding: '12px', textAlign: 'center', backdropFilter: 'blur(2px)'
+                                    }}>
+                                        <span style={{
+                                            color: 'white', fontWeight: 900, fontSize: window.innerWidth >= 768 ? '20px' : '14px',
+                                            textTransform: 'uppercase', letterSpacing: '2px', border: '2px solid white',
+                                            padding: '8px 16px', borderRadius: '4px'
+                                        }}>
+                                            Agendada
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Overlay "Aguardando aprovação para agendamento" */}
+                                {(!['Aprovado', 'Agendado', 'Postado', 'Revisão', 'Revisado Ag. aprovação'].includes(post.status)) && (
+                                    <div style={{
+                                        position: 'absolute', inset: 0,
+                                        background: 'rgba(0,0,0,0.4)',
+                                        zIndex: 15, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        padding: '20px', textAlign: 'center'
+                                    }}>
+                                        <span style={{
+                                            color: 'white', fontWeight: 800, fontSize: window.innerWidth >= 768 ? '14px' : '10px',
+                                            textTransform: 'uppercase', letterSpacing: '1px', lineHeight: 1.4,
+                                            background: 'rgba(0,0,0,0.6)', padding: '8px 12px', borderRadius: '8px',
+                                            backdropFilter: 'blur(4px)'
+                                        }}>
+                                            Aguardando aprovação para agendamento
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* Status Label (Bottom Left) */}
                                 <div style={{
-                                    position: 'absolute',
-                                    bottom: window.innerWidth >= 768 ? '12px' : '8px',
+                                    position: 'absolute', bottom: window.innerWidth >= 768 ? '12px' : '8px',
                                     left: window.innerWidth >= 768 ? '12px' : '8px',
-                                    display: 'flex', gap: '4px',
-                                    zIndex: 10,
+                                    zIndex: 20, display: 'flex', gap: '8px', alignItems: 'center'
                                 }}>
-                                    {post.status === 'Aprovado' && (
-                                        <div style={{
-                                            background: 'rgba(72,187,120,0.95)', padding: '6px 12px',
-                                            borderRadius: '6px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-                                            color: 'white', display: 'flex', alignItems: 'center', gap: '6px',
-                                            border: '1px solid #38a169', backdropFilter: 'blur(4px)'
-                                        }}>
-                                            <CheckCircle size={14} color="white" />
-                                            <span style={{ fontSize: window.innerWidth >= 768 ? '12px' : '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                                Aprovado
-                                            </span>
-                                        </div>
-                                    )}
-                                    {post.status === 'Revisão' && (
-                                        <div style={{
-                                            background: 'rgba(236,201,75,0.95)', padding: '6px 12px',
-                                            borderRadius: '6px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-                                            color: '#744210', display: 'flex', alignItems: 'center', gap: '6px',
-                                            border: '1px solid #d69e2e', backdropFilter: 'blur(4px)'
-                                        }}>
-                                            <MessageSquareText size={14} color="#744210" />
-                                            <span style={{ fontSize: window.innerWidth >= 768 ? '12px' : '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                                Revisão
-                                            </span>
-                                        </div>
-                                    )}
-                                    {post.status === 'Revisado Ag. aprovação' && (
+                                    {post.status === 'Revisado Ag. aprovação' ? (
                                         <button
                                             onClick={(e) => openRevisaoPopup(post, e)}
                                             style={{
@@ -352,6 +361,23 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                                 Ver Revisão
                                             </span>
                                         </button>
+                                    ) : (
+                                        <div style={{
+                                            background: (post.status === 'Aprovado' || post.status === 'Postado') ? 'rgba(72,187,120,0.95)' : 
+                                                        (post.status === 'Revisão') ? 'rgba(236,201,75,0.95)' : 
+                                                        post.statusColor || 'rgba(181,168,255,0.95)',
+                                            padding: '6px 12px', borderRadius: '6px',
+                                            color: (post.status === 'Revisão') ? '#744210' : 'white',
+                                            fontSize: window.innerWidth >= 768 ? '11px' : '9px',
+                                            fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px',
+                                            boxShadow: '0 4px 10px rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)',
+                                            display: 'flex', alignItems: 'center', gap: '6px',
+                                            border: '1px solid rgba(255,255,255,0.1)'
+                                        }}>
+                                            {post.status === 'Aprovado' && <CheckCircle size={14} color="white" />}
+                                            {post.status === 'Revisão' && <MessageSquareText size={14} color="#744210" />}
+                                            <span>{post.status}</span>
+                                        </div>
                                     )}
                                 </div>
                             </div>
