@@ -290,11 +290,11 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                     </div>
                                 )}
 
-                                {/* Máscara Escura para Destaque (Aprovados e Revisão) */}
-                                {(post.status === 'Aprovado' || post.status === 'Revisão' || post.status === 'Revisado Ag. aprovação') && (
+                                {/* Máscara de Destaque (Apenas para posts em revisão/análise interna) */}
+                                {(post.status === 'Revisão' || post.status === 'Revisado Ag. aprovação') && (
                                     <div style={{
                                         position: 'absolute', inset: 0,
-                                        background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.7) 100%)',
+                                        background: 'linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.5) 100%)',
                                         zIndex: 5, pointerEvents: 'none'
                                     }} />
                                 )}
@@ -317,23 +317,13 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                     </div>
                                 )}
 
-                                {/* Overlay "Aguardando aprovação para agendamento" */}
+                                {/* Overlay Sutil para Aguardando Aprovação (Sem texto, apenas opacidade) */}
                                 {(!['Aprovado', 'Agendado', 'Postado', 'Revisão', 'Revisado Ag. aprovação'].includes(post.status)) && (
                                     <div style={{
                                         position: 'absolute', inset: 0,
-                                        background: 'rgba(0,0,0,0.4)',
-                                        zIndex: 15, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        padding: '20px', textAlign: 'center'
-                                    }}>
-                                        <span style={{
-                                            color: 'white', fontWeight: 800, fontSize: window.innerWidth >= 768 ? '14px' : '10px',
-                                            textTransform: 'uppercase', letterSpacing: '1px', lineHeight: 1.4,
-                                            background: 'rgba(0,0,0,0.6)', padding: '8px 12px', borderRadius: '8px',
-                                            backdropFilter: 'blur(4px)'
-                                        }}>
-                                            Aguardando aprovação para agendamento
-                                        </span>
-                                    </div>
+                                        background: 'rgba(0,0,0,0.45)',
+                                        zIndex: 15, pointerEvents: 'none'
+                                    }} />
                                 )}
 
                                 {/* Status Label (Bottom Left) */}
