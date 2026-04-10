@@ -98,8 +98,8 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
         return posts
             .filter(p => {
                 const s = normalizeStatus(p.status);
-                // Busca por qualquer variação de "EM APROVAÇÃO" ou "REVISADO"
-                return s.startsWith('EM APROVACAO') || s === 'REVISADO AG. APROVACAO';
+                // Busca por qualquer variação de "EM APROVAÇÃO" ou "REVISADO" ou "REVISÃO" ou "AGUARDANDO"
+                return s.startsWith('EM APROVACAO') || s === 'REVISADO AG. APROVACAO' || s === 'REVISAO' || s.startsWith('AGUARDANDO');
             })
             .sort((a, b) => {
                 if (!a.dataPostagem) return 1;
@@ -446,9 +446,14 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
             `}</style>
             <div style={{
                 position: 'fixed', bottom: '10px', right: '10px', 
-                fontSize: '10px', color: '#cbd5e0', pointerEvents: 'none', zIndex: 9999
+                fontSize: '12px', color: '#fff', fontWeight: 900, 
+                pointerEvents: 'none', zIndex: 9999, background: '#f97316',
+                padding: '4px 10px', borderRadius: '8px', 
+                boxShadow: '0 4px 12px rgba(249,115,22,0.4)',
+                border: '2px solid white',
+                textTransform: 'uppercase', letterSpacing: '0.5px'
             }}>
-                v1.1
+                Versão: v1.2 (Sincronizado)
             </div>
         </>
     );

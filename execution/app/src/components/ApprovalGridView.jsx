@@ -252,8 +252,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                             </>
                                         );
                                     }
-
-                                    return (
+      return (
                                         <div style={{
                                             height: '100%', display: 'flex', flexDirection: 'column',
                                             alignItems: 'center', justifyContent: 'center',
@@ -353,7 +352,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                 {(() => {
                                     const s = normalizeStatus(post.status);
                                     // Lista ampliada de exclusão para garantir que Agendados e Aprovados fiquem LIMPOS
-                                    const excluded = ['APROVADO', 'APROVADA', 'AGENDADO', 'AGENDADA', 'POSTADO', 'REVISAO', 'REVISADO AG. APROVACAO'];
+                                    const excluded = ['APROVADO', 'APROVADA', 'AGENDADO', 'AGENDADA', 'POSTADO', 'REVISAO', 'REVISADO AG. APROVACAO', 'CONCLUIDO'];
                                     
                                     if (!excluded.includes(s)) {
                                         return (
@@ -411,7 +410,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                             border: '1px solid rgba(255,255,255,0.1)'
                                         }}>
                                             {s === 'APROVADO' && <CheckCircle size={14} color="white" />}
-                                            {s === 'REVISAO' && <MessageSquareText size={14} color="#744210" />}
+                                            {s === 'REVISAO' && <AlertCircle size={14} color="#744210" />}
                                             <span>{post.status}</span>
                                         </div>
                                     );
