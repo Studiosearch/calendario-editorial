@@ -330,23 +330,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                     }} />
                                 )}
 
-                                {/* Overlay "Agendada" */}
-                                {post.status === 'Agendado' && (
-                                    <div style={{
-                                        position: 'absolute', inset: 0,
-                                        background: 'rgba(0,0,0,0.65)',
-                                        zIndex: 15, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        padding: '12px', textAlign: 'center', backdropFilter: 'blur(2px)'
-                                    }}>
-                                        <span style={{
-                                            color: 'white', fontWeight: 900, fontSize: window.innerWidth >= 768 ? '20px' : '14px',
-                                            textTransform: 'uppercase', letterSpacing: '2px', border: '2px solid white',
-                                            padding: '8px 16px', borderRadius: '4px'
-                                        }}>
-                                            Agendada
-                                        </span>
-                                    </div>
-                                )}
+                                {/* Overlay removido conforme solicitado: Agendada agora fica nítida */}
 
                                 {/* Overlay Sutil para Aguardando Aprovação (Sem texto, apenas opacidade) */}
                                 {(!['Aprovado', 'Agendado', 'Postado', 'Revisão', 'Revisado Ag. aprovação'].includes(post.status)) && (
