@@ -13,7 +13,6 @@ function ComparisonContent({ post }) {
     const newFiles = post.revisaoFiles || [];
     const currentFiles = view === 'new' ? newFiles : oldFiles;
     const statusUpper = normalizeStatus(post.status);
-    const statusUpper = (post.status || '').toUpperCase();
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -129,13 +128,16 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
     useEffect(() => {
         // Se voltamos para o grid e temos um scroll salvo
         if (!previewPost && wizardIndex === -1 && !comparePost && lastScrollY > 0) {
-            // Tentativa imediata e uma com delay para boards pesados
-            window.scrollTo({ top: lastScrollY, behavior: 'instant' });
-            
-            const timer = setTimeout(() => {
+            // Tentativa imediata e uma com múltiplos delays para garantir o render do grid
+            const restore = () => {
                 window.scrollTo({ top: lastScrollY, behavior: 'instant' });
-            }, 100);
-            return () => clearTimeout(timer);
+            };
+            
+            restore();
+            setTimeout(restore, 50);
+            setTimeout(restore, 150);
+            setTimeout(restore, 300);
+            setTimeout(restore, 600);
         }
     }, [previewPost, wizardIndex, comparePost]);
 
@@ -442,6 +444,12 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
                     to { opacity: 1; transform: scale(1) translateY(0); }
                 }
             `}</style>
+            <div style={{
+                position: 'fixed', bottom: '10px', right: '10px', 
+                fontSize: '10px', color: '#cbd5e0', pointerEvents: 'none', zIndex: 9999
+            }}>
+                v1.1
+            </div>
         </>
     );
 }

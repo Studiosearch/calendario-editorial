@@ -289,7 +289,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
 
                                     {(() => {
                                         const statusNorm = normalizeStatus(post.status);
-                                        const isRevised = statusNorm === 'REVISADO AG. APROVACAO';
+                                        const isRevised = statusNorm === 'REVISADO AG. APROVACAO' || statusNorm === 'REVISAO';
                                         const hasRevisedFiles = post.revisaoFiles?.length > 0;
                                         if (isRevised && hasRevisedFiles && post.postagem?.length > 0) {
                                             return (
@@ -373,43 +373,49 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                     left: window.innerWidth >= 768 ? '12px' : '8px',
                                     zIndex: 20, display: 'flex', gap: '8px', alignItems: 'center'
                                 }}>
-                                    {post.status === 'Revisado Ag. aprovação' ? (
-                                        <button
-                                            onClick={(e) => openRevisaoPopup(post, e)}
-                                            style={{
-                                                background: 'rgba(249,115,22,0.95)', padding: '6px 12px',
-                                                borderRadius: '6px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-                                                color: 'white', display: 'flex', alignItems: 'center', gap: '6px',
-                                                border: '1px solid #ea580c', backdropFilter: 'blur(4px)',
-                                                cursor: 'pointer', fontFamily: 'inherit',
-                                                transition: 'all 0.2s',
-                                            }}
-                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(234,88,12,0.98)'}
-                                            onMouseLeave={e => e.currentTarget.style.background = 'rgba(249,115,22,0.95)'}
-                                        >
-                                            <ClipboardList size={14} color="white" />
-                                            <span style={{ fontSize: window.innerWidth >= 768 ? '12px' : '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                                Ver Revisão
-                                            </span>
-                                        </button>
-                                    ) : (
+                                {(() => {
+                                    const s = normalizeStatus(post.status);
+                                    if (s === 'REVISADO AG. APROVACAO') {
+                                        return (
+                                            <button
+                                                onClick={(e) => openRevisaoPopup(post, e)}
+                                                style={{
+                                                    background: 'rgba(249,115,22,0.95)', padding: '6px 12px',
+                                                    borderRadius: '6px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                                                    color: 'white', display: 'flex', alignItems: 'center', gap: '6px',
+                                                    border: '1px solid #ea580c', backdropFilter: 'blur(4px)',
+                                                    cursor: 'pointer', fontFamily: 'inherit',
+                                                    transition: 'all 0.2s',
+                                                }}
+                                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(234,88,12,0.98)'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(249,115,22,0.95)'}
+                                            >
+                                                <ClipboardList size={14} color="white" />
+                                                <span style={{ fontSize: window.innerWidth >= 768 ? '12px' : '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                    Ver Revisão
+                                                </span>
+                                            </button>
+                                        );
+                                    }
+                                    return (
                                         <div style={{
-                                            background: (post.status === 'Aprovado' || post.status === 'Postado') ? 'rgba(72,187,120,0.95)' : 
-                                                        (post.status === 'Revisão') ? 'rgba(236,201,75,0.95)' : 
+                                            background: (s === 'APROVADO' || s === 'POSTADO') ? 'rgba(72,187,120,0.95)' : 
+                                                        (s === 'REVISAO') ? 'rgba(236,201,75,0.95)' : 
                                                         post.statusColor || 'rgba(181,168,255,0.95)',
                                             padding: '6px 12px', borderRadius: '6px',
-                                            color: (post.status === 'Revisão') ? '#744210' : 'white',
+                                            color: (s === 'REVISAO') ? '#744210' : 'white',
                                             fontSize: window.innerWidth >= 768 ? '11px' : '9px',
                                             fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px',
                                             boxShadow: '0 4px 10px rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)',
                                             display: 'flex', alignItems: 'center', gap: '6px',
                                             border: '1px solid rgba(255,255,255,0.1)'
                                         }}>
-                                            {post.status === 'Aprovado' && <CheckCircle size={14} color="white" />}
-                                            {post.status === 'Revisão' && <MessageSquareText size={14} color="#744210" />}
+                                            {s === 'APROVADO' && <CheckCircle size={14} color="white" />}
+                                            {s === 'REVISAO' && <MessageSquareText size={14} color="#744210" />}
                                             <span>{post.status}</span>
                                         </div>
-                                    )}
+                                    );
+                                })()}
                                 </div>
                             </div>
                         ))}
