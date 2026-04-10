@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Calendar, CheckCircle, AlertCircle, Send, X, Share2, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, CheckCircle, AlertCircle, Send, X, Share2, ShieldCheck, ChevronLeft, ChevronRight, ClipboardList } from 'lucide-react';
 import FilePreview from './FilePreview';
 
 export default function ApprovalDetailView({ post, metadata, onClose, onApprove, onRevision }) {
@@ -7,12 +7,25 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
     const [revisionCategories, setRevisionCategories] = useState([]);
     const [revisionText, setRevisionText] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [revisaoPopupOpen, setRevisaoPopupOpen] = useState(false);
+    const [revisaoCarouselIdx, setRevisaoCarouselIdx] = useState(0);
     const carouselRef = useRef(null);
+    const revisaoCarouselRef = useRef(null);
 
     const scrollCarousel = (direction) => {
         if (!carouselRef.current) return;
         const width = carouselRef.current.clientWidth;
         carouselRef.current.scrollBy({ left: direction * width, behavior: 'smooth' });
+    };
+
+    const scrollRevisaoCarousel = (direction) => {
+        const files = post.revisaoFiles || [];
+        setRevisaoCarouselIdx(prev => {
+            const next = prev + direction;
+            if (next < 0) return files.length - 1;
+            if (next >= files.length) return 0;
+            return next;
+        });
     };
 
     const handleApprove = async () => {
@@ -152,13 +165,34 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                                     {post.dataPostagem?.toLocaleDateString('pt-BR') || 'Data a definir'}
                                 </span>
                             </div>
-                            <span style={{
-                                padding: '4px 12px', borderRadius: '999px',
-                                background: post.statusColor || '#c4c4c4', color: 'white',
-                                fontSize: '12px', fontWeight: 600,
-                            }}>
-                                {post.status}
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {/* Label Revisão clicável */}
+                                {(post.revisaoFiles?.length > 0) && (
+                                    <button
+                                        onClick={() => { setRevisaoCarouselIdx(0); setRevisaoPopupOpen(true); }}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '5px',
+                                            padding: '4px 10px', borderRadius: '999px',
+                                            background: 'rgba(236,201,75,0.15)', color: '#b7791f',
+                                            border: '1.5px solid #ecc94b', fontSize: '11px', fontWeight: 700,
+                                            cursor: 'pointer', transition: 'all 0.2s',
+                                            letterSpacing: '0.5px', textTransform: 'uppercase',
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(236,201,75,0.3)'}
+                                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(236,201,75,0.15)'}
+                                    >
+                                        <ClipboardList size={12} />
+                                        Revisão
+                                    </button>
+                                )}
+                                <span style={{
+                                    padding: '4px 12px', borderRadius: '999px',
+                                    background: post.statusColor || '#c4c4c4', color: 'white',
+                                    fontSize: '12px', fontWeight: 600,
+                                }}>
+                                    {post.status}
+                                </span>
+                            </div>
                         </div>
 
                         {/* Plataformas */}
@@ -327,6 +361,159 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                                 <Send size={16} /> Enviar Feedback
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Popup Revisão - Imagens da coluna de Revisão */}
+            {revisaoPopupOpen && (
+                <div
+                    style={{
+                        position: 'fixed', inset: 0, zIndex: 3000,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                >
+                    {/* Backdrop */}
+                    <div
+                        onClick={() => setRevisaoPopupOpen(false)}
+                        style={{
+                            position: 'absolute', inset: 0,
+                            background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)',
+                        }}
+                    />
+                    {/* Content */}
+                    <div style={{
+                        position: 'relative', zIndex: 1,
+                        width: '92vw', maxWidth: '520px',
+                        background: 'white', borderRadius: '20px',
+                        boxShadow: '0 30px 80px rgba(0,0,0,0.4)',
+                        overflow: 'hidden',
+                    }}>
+                        {/* Header */}
+                        <div style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '16px 20px',
+                            background: 'linear-gradient(135deg, #fefce8 0%, #fef9c3 100%)',
+                            borderBottom: '1px solid #fde68a',
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <ClipboardList size={18} color="#b7791f" />
+                                <span style={{ fontWeight: 800, fontSize: '15px', color: '#92400e' }}>
+                                    Imagens de Revisão
+                                </span>
+                                {post.revisaoFiles?.length > 1 && (
+                                    <span style={{
+                                        background: '#ecc94b', color: '#744210',
+                                        borderRadius: '999px', padding: '1px 8px',
+                                        fontSize: '11px', fontWeight: 700
+                                    }}>
+                                        {revisaoCarouselIdx + 1} / {post.revisaoFiles.length}
+                                    </span>
+                                )}
+                            </div>
+                            <button
+                                onClick={() => setRevisaoPopupOpen(false)}
+                                style={{
+                                    width: '30px', height: '30px', border: 'none',
+                                    background: 'rgba(0,0,0,0.06)', borderRadius: '50%',
+                                    cursor: 'pointer', display: 'flex', alignItems: 'center',
+                                    justifyContent: 'center', color: '#92400e',
+                                    transition: 'background 0.2s',
+                                }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.14)'}
+                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0.06)'}
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+
+                        {/* Image Area */}
+                        <div style={{
+                            position: 'relative',
+                            background: '#111',
+                            minHeight: '300px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                            {post.revisaoFiles?.length > 0 ? (
+                                <>
+                                    <div style={{
+                                        width: '100%',
+                                        aspectRatio: '1 / 1',
+                                        maxHeight: '60vh',
+                                    }}>
+                                        <FilePreview
+                                            file={post.revisaoFiles[revisaoCarouselIdx]}
+                                            height="100%"
+                                            objectFit="contain"
+                                        />
+                                    </div>
+                                    {/* Nav arrows */}
+                                    {post.revisaoFiles.length > 1 && (
+                                        <>
+                                            <button
+                                                onClick={() => scrollRevisaoCarousel(-1)}
+                                                style={{
+                                                    position: 'absolute', left: '12px', top: '50%',
+                                                    transform: 'translateY(-50%)',
+                                                    width: '36px', height: '36px', borderRadius: '50%', border: 'none',
+                                                    background: 'rgba(255,255,255,0.85)', color: '#1a202c',
+                                                    cursor: 'pointer', display: 'flex', alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)', zIndex: 10,
+                                                    backdropFilter: 'blur(4px)',
+                                                }}
+                                            >
+                                                <ChevronLeft size={20} />
+                                            </button>
+                                            <button
+                                                onClick={() => scrollRevisaoCarousel(1)}
+                                                style={{
+                                                    position: 'absolute', right: '12px', top: '50%',
+                                                    transform: 'translateY(-50%)',
+                                                    width: '36px', height: '36px', borderRadius: '50%', border: 'none',
+                                                    background: 'rgba(255,255,255,0.85)', color: '#1a202c',
+                                                    cursor: 'pointer', display: 'flex', alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)', zIndex: 10,
+                                                    backdropFilter: 'blur(4px)',
+                                                }}
+                                            >
+                                                <ChevronRight size={20} />
+                                            </button>
+                                        </>
+                                    )}
+                                </>
+                            ) : (
+                                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', padding: '48px' }}>
+                                    Nenhuma imagem de revisão
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Thumbnails (se houver mais de 1) */}
+                        {post.revisaoFiles?.length > 1 && (
+                            <div style={{
+                                display: 'flex', gap: '6px', padding: '12px 16px',
+                                overflowX: 'auto', background: '#f7fafc',
+                                borderTop: '1px solid #e2e8f0',
+                            }}>
+                                {post.revisaoFiles.map((file, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setRevisaoCarouselIdx(idx)}
+                                        style={{
+                                            flexShrink: 0, width: '56px', height: '56px',
+                                            borderRadius: '8px', overflow: 'hidden', border: 'none',
+                                            cursor: 'pointer', padding: 0,
+                                            outline: revisaoCarouselIdx === idx ? '2.5px solid #ecc94b' : '2px solid transparent',
+                                            transition: 'outline 0.15s', opacity: revisaoCarouselIdx === idx ? 1 : 0.6,
+                                        }}
+                                    >
+                                        <FilePreview file={file} height="56px" objectFit="cover" disableViewer />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

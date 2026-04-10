@@ -23,7 +23,10 @@ const identifyColumns = (boardColumns) => {
         else if (title.includes('plataforma') || title.includes('rede') || title.includes('midia')) colMap.plataformas = c.id;
         else if (title.includes('tipo') || title.includes('formato') || title.includes('linha editorial')) colMap.tipoDePost = c.id;
         else if (title.includes('desenvolvimento') || title.includes('etapa') || title.includes('fase') || title.includes('status da arte')) colMap.desenvolvimento = c.id;
-        else if (title.includes('revisao') || title.includes('alteracao') || title.includes('feedback')) colMap.revisao = c.id;
+        else if (title.includes('revisao') || title.includes('alteracao') || title.includes('feedback')) {
+            if (type === 'file') colMap.revisaoFiles = c.id;
+            else colMap.revisao = c.id;
+        }
         else if (title.includes('arquivo') || title.includes('arte') || title.includes('postagem') || type === 'file') colMap.postagem = c.id;
     }
 
@@ -111,6 +114,7 @@ export function usePosts(apiToken, boardId) {
                         tipoDePost: '',
                         desenvolvimento: '',
                         postagem: [],
+                        revisaoFiles: [],
                         dataPostagem: null
                     };
 
@@ -160,6 +164,10 @@ export function usePosts(apiToken, boardId) {
                                         });
                                     }
                                 } catch (e) { }
+                            }
+                        } else if (cv.id === cols.revisaoFiles) {
+                            if (Array.isArray(val)) {
+                                post.revisaoFiles = val;
                             }
                         }
                     });
