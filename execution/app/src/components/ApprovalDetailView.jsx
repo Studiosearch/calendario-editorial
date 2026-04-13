@@ -59,14 +59,15 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
     };
 
     const statusUpper = normalizeStatus(post.status);
-    const isRevised = statusUpper === 'REVISADO AG. APROVACAO';
+    const isRevised = statusUpper.includes('REVISADO') || statusUpper.includes('AG. APROVACAO');
     const mediaFiles = (isRevised && post.revisaoFiles?.length > 0) 
         ? post.revisaoFiles 
         : post.postagem;
 
     const hasOriginal = post.postagem?.length > 0;
     const hasRevised = post.revisaoFiles?.length > 0;
-    const canCompare = hasOriginal && hasRevised;
+    // O botão deve aparecer se for um post revisado, mesmo que a arte original ainda esteja sendo carregada
+    const canCompare = isRevised && hasRevised;
 
     return (
         <div className="animate-slide-fade-in" style={{ background: '#f7fafc', minHeight: '100vh', paddingBottom: '40px' }}>
@@ -99,33 +100,6 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
             <div style={{ maxWidth: '600px', margin: '0 auto', padding: '0 0 40px' }}>
                 <div style={{ position: 'relative', background: '#000', borderRadius: '0 0 24px 24px', overflow: 'hidden' }}>
                     
-                    {/* Botão Comparar Criativos (Overlay na imagem se puder comparar) */}
-                    {canCompare && (
-                        <button 
-                            onClick={() => window.dispatchEvent(new CustomEvent('open-compare', { detail: post }))}
-                            style={{
-                                position: 'absolute', top: '16px', left: '16px', zIndex: 30,
-                                padding: '8px 16px', borderRadius: '12px', border: 'none',
-                                background: 'rgba(255,255,255,0.9)', color: '#B5A8FF',
-                                fontWeight: 800, fontSize: '12px', cursor: 'pointer',
-                                display: 'flex', alignItems: 'center', gap: '8px',
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.2)', backdropFilter: 'blur(4px)'
-                            }}
-                        >
-                            <ClipboardList size={14} />
-                            Comparar Criativos
-                        </button>
-                    )}
-
-                    {/* Indicador de Versão */}
-                    <div style={{
-                        position: 'absolute', top: '16px', right: '16px', zIndex: 30,
-                        background: 'rgba(0,0,0,0.5)', color: 'white', padding: '4px 12px',
-                        borderRadius: '20px', fontSize: '10px', fontWeight: 800, backdropFilter: 'blur(4px)'
-                    }}>
-                        {isRevised ? 'VERSÃO REVISADA' : 'VERSÃO ORIGINAL'}
-                    </div>
-
                     <div style={{ position: 'relative' }}>
                         <div ref={carouselRef} style={{
                             display: 'flex', overflowX: 'auto', scrollSnapType: 'x mandatory',
@@ -189,6 +163,11 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                             );
                         })()}
                     </div>
+
+                    {/* Metadata Card */}
+                    <div style={{
+                        padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px',
+                        background: 'white', borderTop: '1px solid #e2e8f0',
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#B5A8FF' }}>
@@ -198,8 +177,8 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                                 </span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                {/* Label Revisão clicável */}
-                                {(post.revisaoFiles?.length > 0) && (
+                                {/* Botão Arte Anterior (Apenas se for post revisado) */}
+                                {isRevised && hasOriginal && (
                                     <button
                                         onClick={() => { setRevisaoCarouselIdx(0); setRevisaoPopupOpen(true); }}
                                         style={{
@@ -214,7 +193,7 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                                         onMouseLeave={e => e.currentTarget.style.background = 'rgba(236,201,75,0.15)'}
                                     >
                                         <ClipboardList size={12} />
-                                        Revisão
+                                        Ver Arte Anterior
                                     </button>
                                 )}
                                 <span style={{
@@ -310,6 +289,32 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                             >
                                 <AlertCircle size={20} /> Solicitar Alterações
                             </button>
+                            {/* Novo botão Comparar abaixo de Solicitar Alterações */}
+                            {isRevised && (
+                                <button 
+                                    onClick={() => {
+                                        if (!canCompare) {
+                                            alert("Não encontramos a versão anterior deste post no Monday. Verifique se as artes estão nas colunas corretas.");
+                                        } else {
+                                            window.dispatchEvent(new CustomEvent('open-compare', { detail: post }));
+                                        }
+                                    }}
+                                    style={{
+                                        width: '100%', padding: window.innerWidth >= 768 ? '14px' : '12px',
+                                        borderRadius: '12px', border: '1px solid #ecc94b',
+                                        background: '#fef3c7', color: '#92400e',
+                                        fontSize: '15px', fontWeight: 800,
+                                        cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                        transition: 'all 0.2s',
+                                        boxShadow: '0 4px 10px rgba(236,201,75,0.2)'
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.background = '#fef08a'}
+                                    onMouseLeave={e => e.currentTarget.style.background = '#fef3c7'}
+                                >
+                                    <ClipboardList size={20} /> Comparar com Arte Anterior (V1)
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -450,15 +455,15 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <ClipboardList size={18} color="#b7791f" />
                                 <span style={{ fontWeight: 800, fontSize: '15px', color: '#92400e' }}>
-                                    Imagens de Revisão
+                                    Arte Anterior (Original)
                                 </span>
-                                {post.revisaoFiles?.length > 1 && (
+                                {post.postagem?.length > 1 && (
                                     <span style={{
                                         background: '#ecc94b', color: '#744210',
                                         borderRadius: '999px', padding: '1px 8px',
                                         fontSize: '11px', fontWeight: 700
                                     }}>
-                                        {revisaoCarouselIdx + 1} / {post.revisaoFiles.length}
+                                        {revisaoCarouselIdx + 1} / {post.postagem.length}
                                     </span>
                                 )}
                             </div>
@@ -485,7 +490,7 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                             minHeight: '300px',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
-                            {post.revisaoFiles?.length > 0 ? (
+                            {post.postagem?.length > 0 ? (
                                 <>
                                     <div style={{
                                         width: '100%',
@@ -493,13 +498,13 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                                         maxHeight: '60vh',
                                     }}>
                                         <FilePreview
-                                            file={post.revisaoFiles[revisaoCarouselIdx]}
+                                            file={post.postagem[revisaoCarouselIdx]}
                                             height="100%"
                                             objectFit="contain"
                                         />
                                     </div>
                                     {/* Nav arrows */}
-                                    {post.revisaoFiles.length > 1 && (
+                                    {post.postagem.length > 1 && (
                                         <>
                                             <button
                                                 onClick={() => scrollRevisaoCarousel(-1)}
@@ -536,19 +541,19 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
                                 </>
                             ) : (
                                 <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', padding: '48px' }}>
-                                    Nenhuma imagem de revisão
+                                    Nenhuma imagem original encontrada
                                 </div>
                             )}
                         </div>
 
                         {/* Thumbnails (se houver mais de 1) */}
-                        {post.revisaoFiles?.length > 1 && (
+                        {post.postagem?.length > 1 && (
                             <div style={{
                                 display: 'flex', gap: '6px', padding: '12px 16px',
                                 overflowX: 'auto', background: '#f7fafc',
                                 borderTop: '1px solid #e2e8f0',
                             }}>
-                                {post.revisaoFiles.map((file, idx) => (
+                                {post.postagem.map((file, idx) => (
                                     <button
                                         key={idx}
                                         onClick={() => setRevisaoCarouselIdx(idx)}

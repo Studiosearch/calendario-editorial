@@ -5,46 +5,54 @@ import { fetchMondayGraphQL, parseColumnValue, uploadFileToMonday, deleteMondayI
 // Mapeamento local para identificar colunas por nome ou tipo.
 const identifyColumns = (boardColumns) => {
     const colMap = {};
+    let postagemPriority = 0;
+
     for (const c of boardColumns) {
-        // Normaliza título tirando acentos e passando pra minúscula
         const title = (c.title || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const type = c.type;
 
-        // Priority checks
         if (type === 'date' && (title.includes('postagem') || title.includes('publicacao'))) {
             colMap.date = c.id;
         } else if (!colMap.date && (title.includes('data') || type === 'date')) {
             colMap.date = c.id;
-        }
-
-        else if (title === 'status' || title.includes('status do post') || title.includes('aprovacao')) colMap.status = c.id;
-        else if (title.includes('legenda') || title.includes('copy') || title.includes('texto final')) colMap.legenda = c.id;
-        else if (title.includes('roteiro') || title.includes('script') || title.includes('video')) colMap.roteiro = c.id;
-        else if (title.includes('plataforma') || title.includes('rede') || title.includes('midia')) colMap.plataformas = c.id;
-        else if (title.includes('tipo') || title.includes('formato') || title.includes('linha editorial')) colMap.tipoDePost = c.id;
-        else if (title.includes('desenvolvimento') || title.includes('etapa') || title.includes('fase') || title.includes('status da arte')) colMap.desenvolvimento = c.id;
-        else if (title.includes('revisao') || title.includes('alteracao') || title.includes('feedback')) {
+        } else if (title === 'status' || title.includes('status do post') || title.includes('aprovacao')) {
+            colMap.status = c.id;
+        } else if (title.includes('legenda') || title.includes('copy') || title.includes('texto final')) {
+            colMap.legenda = c.id;
+        } else if (title.includes('roteiro') || title.includes('script') || title.includes('video')) {
+            colMap.roteiro = c.id;
+        } else if (title.includes('plataforma') || title.includes('rede') || title.includes('midia')) {
+            colMap.plataformas = c.id;
+        } else if (title.includes('tipo') || title.includes('formato') || title.includes('linha editorial')) {
+            colMap.tipoDePost = c.id;
+        } else if (title.includes('desenvolvimento') || title.includes('etapa') || title.includes('fase') || title.includes('status da arte')) {
+            colMap.desenvolvimento = c.id;
+        } else if (title.includes('revisao') || title.includes('alteracao') || title.includes('feedback')) {
             if (type === 'file') colMap.revisaoFiles = c.id;
             else colMap.revisao = c.id;
+        } else if (type === 'file') {
+            let p = 1;
+            if (title === 'postagem') p = 5;
+            else if (title.includes('postagem')) p = 4;
+            else if (title.includes('arte')) p = 3;
+            else if (title.includes('arquivo')) p = 2;
+
+            if (p > postagemPriority) {
+                colMap.postagem = c.id;
+                postagemPriority = p;
+            }
         }
-        else if (title.includes('arquivo') || title.includes('arte') || title.includes('postagem') || type === 'file') colMap.postagem = c.id;
     }
 
-    // Fallback: se nenhum status principal bateu no título, pega a primeira coluna tipo status
     if (!colMap.status) colMap.status = boardColumns.find(c => c.type === 'status')?.id;
 
-    // Fallback robusto para revisaoFiles: se ainda não detectado pelo nome,
-    // pega qualquer coluna de arquivo que não seja já a coluna postagem
     if (!colMap.revisaoFiles) {
         const allFileCols = boardColumns.filter(c => c.type === 'file');
         if (allFileCols.length > 1) {
             const extra = allFileCols.find(c => c.id !== colMap.postagem);
             if (extra) {
                 colMap.revisaoFiles = extra.id;
-                console.log('📎 Coluna de revisão detectada via fallback (2ª coluna de arquivo):', extra.title, extra.id);
             }
-        } else if (allFileCols.length === 1 && !colMap.postagem) {
-            // Se existe só uma coluna de arquivo e ainda não mapeamos postagem, não sobrescreve
         }
     }
 
@@ -141,9 +149,15 @@ export function usePosts(apiToken, boardId) {
                         dataPostagem: null
                     };
 
+                    let firstFileFound = null;
+
                     item.column_values.forEach(cv => {
                         const val = parseColumnValue(cv, item.assets);
                         if (!val) return;
+
+                        if (cv.type === 'file' && Array.isArray(val) && val.length > 0 && !firstFileFound) {
+                            firstFileFound = val;
+                        }
 
                         if (cv.id === cols.date) {
                             if (typeof val === 'string') {
@@ -172,7 +186,7 @@ export function usePosts(apiToken, boardId) {
                                 post.plataformas = val.split(',').map(s => s.trim());
                             }
                         } else if (cv.id === cols.postagem) {
-                            if (Array.isArray(val)) {
+                            if (Array.isArray(val) && val.length > 0) {
                                 post.postagem = val;
                                 try {
                                     const cached = localStorage.getItem(`post_img_order_${item.id}`);
@@ -198,6 +212,10 @@ export function usePosts(apiToken, boardId) {
                             }
                         }
                     });
+
+                    if (post.postagem.length === 0 && firstFileFound) {
+                        post.postagem = firstFileFound;
+                    }
 
                     return post;
                 });

@@ -35,6 +35,25 @@ export default function PostDetailPlanning({
                 </span>
             </div>
 
+            {/* Feedback do Cliente (Se houver) */}
+            {item.alteracoesSolicitadas && (
+                <div style={{
+                    padding: '16px', borderRadius: '12px',
+                    background: '#fff7ed', border: '1px solid #fed7aa',
+                    display: 'flex', flexDirection: 'column', gap: '8px'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#c2410c' }}>
+                        <MessageSquareText size={18} />
+                        <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            Feedback do Cliente
+                        </span>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#9a3412', lineHeight: 1.6, fontWeight: 500 }}>
+                        {item.alteracoesSolicitadas}
+                    </p>
+                </div>
+            )}
+
             {/* Desenvolvimento + Tipo */}
             <div style={{ display: 'flex', gap: '16px' }}>
                 <div style={{ flex: 1 }}>

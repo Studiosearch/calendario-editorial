@@ -116,6 +116,35 @@ export default function PostDetailCreative({ item, legenda, onLegendaChange, onU
                 </div>
             </div>
 
+            {/* Arte Revisada (Se houver) */}
+            {item.revisaoFiles?.length > 0 && (
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f97316', marginBottom: '12px' }}>
+                        <Palette size={18} />
+                        <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            ARTE REVISADA (V2)
+                        </span>
+                    </div>
+                    <div style={{
+                        borderRadius: '12px', overflow: 'hidden',
+                        border: '1px solid #fed7aa', minHeight: '100px',
+                        background: '#fffbf5',
+                    }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+                            gap: '10px', padding: '10px',
+                        }}>
+                            {item.revisaoFiles.map((f) => (
+                                <div key={f.id} style={{ borderRadius: '6px', overflow: 'hidden', border: '1px solid #fed7aa' }}>
+                                    <FilePreview file={f} height="120px" objectFit="cover" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Legenda */}
             <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#718096', marginBottom: '12px' }}>

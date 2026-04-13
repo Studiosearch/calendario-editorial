@@ -21,7 +21,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
     const statusIconSize = useBreakpointValue({ base: 10, md: 18 });
 
     const [filterMonth, setFilterMonth] = useState('all');
-    const [visibleMonthLimit, setVisibleMonthLimit] = useState(1);
+    const [visibleMonthLimit, setVisibleMonthLimit] = useState(3);
 
     // Popup de revisão
     const [revisaoPost, setRevisaoPost] = useState(null);
@@ -228,10 +228,11 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                 }}
                             >
                                 {(() => {
-                                    const statusNorm = normalizeStatus(post.status);
-                                    const isRevised = statusNorm === 'REVISADO AG. APROVACAO';
-                                    const hasRevisedFiles = post.revisaoFiles?.length > 0;
-                                    const displayFile = (isRevised && hasRevisedFiles) ? post.revisaoFiles[0] : post.postagem?.[0];
+                                    const statusUpper = normalizeStatus(post.status);
+                                    // Mais flexível: se contém revisado ou ag. aprovação, é um post revisado
+                                    const isRevised = statusUpper.includes('REVISADO') || statusUpper.includes('AG. APROVACAO');
+                                    
+                                    const displayFile = (isRevised && post.revisaoFiles?.length > 0) ? post.revisaoFiles[0] : post.postagem?.[0];
 
                                     if (displayFile) {
                                         return (
@@ -351,10 +352,16 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                 {/* Overlay Sutil para Aguardando Aprovação (Sem texto, apenas opacidade) */}
                                 {(() => {
                                     const s = normalizeStatus(post.status);
-                                    // Lista ampliada de exclusão para garantir que Agendados e Aprovados fiquem LIMPOS
-                                    const excluded = ['APROVADO', 'APROVADA', 'AGENDADO', 'AGENDADA', 'POSTADO', 'REVISAO', 'REVISADO AG. APROVACAO', 'CONCLUIDO'];
                                     
-                                    if (!excluded.includes(s)) {
+                                    // Keywords que NÃO devem ter o overlay escuro
+                                    const clearKeywords = [
+                                        'APROVADO', 'APROVADA', 'AGENDADO', 'AGENDADA', 'POSTADO', 
+                                        'REVISAO', 'REVISADO', 'CONCLUIDO', 'AGUARDANDO', 'APROVACAO'
+                                    ];
+                                    
+                                    const isExcluded = clearKeywords.some(kw => s.includes(kw));
+
+                                    if (!isExcluded) {
                                         return (
                                             <div style={{
                                                 position: 'absolute', inset: 0,
@@ -379,19 +386,19 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                             <button
                                                 onClick={(e) => openRevisaoPopup(post, e)}
                                                 style={{
-                                                    background: 'rgba(249,115,22,0.95)', padding: '6px 12px',
+                                                    background: 'rgba(236,201,75,0.95)', padding: '6px 12px',
                                                     borderRadius: '6px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-                                                    color: 'white', display: 'flex', alignItems: 'center', gap: '6px',
-                                                    border: '1px solid #ea580c', backdropFilter: 'blur(4px)',
+                                                    color: '#744210', display: 'flex', alignItems: 'center', gap: '6px',
+                                                    border: '1px solid #ecc94b', backdropFilter: 'blur(4px)',
                                                     cursor: 'pointer', fontFamily: 'inherit',
                                                     transition: 'all 0.2s',
                                                 }}
-                                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(234,88,12,0.98)'}
-                                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(249,115,22,0.95)'}
+                                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(236,201,75,1)'}
+                                                onMouseLeave={e => e.currentTarget.style.background = 'rgba(236,201,75,0.95)'}
                                             >
-                                                <ClipboardList size={14} color="white" />
+                                                <ClipboardList size={14} color="#744210" />
                                                 <span style={{ fontSize: window.innerWidth >= 768 ? '12px' : '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                                    Ver Revisão
+                                                    Ver Arte Anterior
                                                 </span>
                                             </button>
                                         );
@@ -472,7 +479,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                             <ClipboardList size={18} color="#c2410c" />
                                             <div>
                                                 <span style={{ fontWeight: 800, fontSize: '15px', color: '#9a3412', display: 'block' }}>
-                                                    Revisão Concluída
+                                                    Arte Anterior (Original)
                                                 </span>
                                                 <span style={{ fontSize: '11px', color: '#c2410c', fontWeight: 500 }}>
                                                     {revisaoPost.name}
@@ -493,20 +500,20 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                     </div>
 
                                     <div style={{ overflowY: 'auto', flex: 1 }}>
-                                        {/* Imagens de Revisão */}
-                                        {revisaoPost.revisaoFiles?.length > 0 && (
+                                        {/* Imagens Originais */}
+                                        {revisaoPost.postagem?.length > 0 && (
                                             <div style={{ position: 'relative', background: '#111' }}>
                                                 <div style={{
                                                     width: '100%', aspectRatio: '1 / 1',
                                                     maxHeight: '320px', overflow: 'hidden',
                                                 }}>
                                                     <FilePreview
-                                                        file={revisaoPost.revisaoFiles[revisaoIdx]}
+                                                        file={revisaoPost.postagem[revisaoIdx]}
                                                         height="100%"
                                                         objectFit="contain"
                                                     />
                                                 </div>
-                                                {revisaoPost.revisaoFiles.length > 1 && (
+                                                {revisaoPost.postagem.length > 1 && (
                                                     <>
                                                         <div style={{
                                                             position: 'absolute', top: '10px', right: '10px',
@@ -514,15 +521,15 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                                             padding: '3px 8px', borderRadius: '999px',
                                                             fontSize: '11px', fontWeight: 700,
                                                         }}>
-                                                            {revisaoIdx + 1} / {revisaoPost.revisaoFiles.length}
+                                                            {revisaoIdx + 1} / {revisaoPost.postagem.length}
                                                         </div>
-                                                        <button onClick={() => setRevisaoIdx(i => i > 0 ? i - 1 : revisaoPost.revisaoFiles.length - 1)} style={{
+                                                        <button onClick={() => setRevisaoIdx(i => i > 0 ? i - 1 : revisaoPost.postagem.length - 1)} style={{
                                                             position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)',
                                                             width: '32px', height: '32px', borderRadius: '50%', border: 'none',
                                                             background: 'rgba(255,255,255,0.85)', cursor: 'pointer',
                                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                         }}><ChevronLeft size={18} /></button>
-                                                        <button onClick={() => setRevisaoIdx(i => i < revisaoPost.revisaoFiles.length - 1 ? i + 1 : 0)} style={{
+                                                        <button onClick={() => setRevisaoIdx(i => i < revisaoPost.postagem.length - 1 ? i + 1 : 0)} style={{
                                                             position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
                                                             width: '32px', height: '32px', borderRadius: '50%', border: 'none',
                                                             background: 'rgba(255,255,255,0.85)', cursor: 'pointer',
@@ -531,9 +538,9 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                                     </>
                                                 )}
                                                 {/* Thumbnails */}
-                                                {revisaoPost.revisaoFiles.length > 1 && (
+                                                {revisaoPost.postagem.length > 1 && (
                                                     <div style={{ display: 'flex', gap: '6px', padding: '10px 14px', background: '#1a1a1a', overflowX: 'auto' }}>
-                                                        {revisaoPost.revisaoFiles.map((f, i) => (
+                                                        {revisaoPost.postagem.map((f, i) => (
                                                             <button key={i} onClick={() => setRevisaoIdx(i)} style={{
                                                                 flexShrink: 0, width: '48px', height: '48px',
                                                                 borderRadius: '6px', overflow: 'hidden',

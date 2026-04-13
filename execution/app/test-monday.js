@@ -1,4 +1,4 @@
-
+const process = require('process');
 
 const MONDAY_BOARDS = [
     { id: '18022978435', name: 'Clinica Integrare' },
@@ -23,28 +23,6 @@ async function fetchMondayGraphQL(query, variables, token) {
 }
 
 async function run() {
-    const token = process.env.VITE_MONDAY_API_TOKEN;
-    if (!token) {
-        console.error("Token não encontrado no .env!");
-        return;
-    }
-
-    const query = `
-      query {
-        boards(ids: ["10063228355"]) {
-          name
-          columns { id title type }
-        }
-      }
-    `;
-
-    try {
-        console.log("Fetching Solucione Services...");
-        const data = await fetchMondayGraphQL(query, {}, token);
-        console.log(JSON.stringify(data.data.boards[0].columns, null, 2));
-    } catch (err) {
-        console.error(err);
-    }
+    const token = "YOUR_TOKEN_HERE"; // Switch to using it from env in real run
+    // Actually I'll use process.env via run_command if I can, but I'll just put the logic here.
 }
-
-run();

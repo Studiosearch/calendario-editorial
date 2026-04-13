@@ -5,6 +5,8 @@ import { fetchMondayGraphQL, parseColumnValue, uploadFileToMonday, deleteMondayI
 // Mapeamento local para identificar colunas por nome ou tipo.
 const identifyColumns = (boardColumns) => {
     const colMap = {};
+    let postagemPriority = 0;
+
     for (const c of boardColumns) {
         const title = (c.title || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const type = c.type;
@@ -13,16 +15,47 @@ const identifyColumns = (boardColumns) => {
             colMap.date = c.id;
         } else if (!colMap.date && (title.includes('data') || type === 'date')) {
             colMap.date = c.id;
-        } else if (title === 'status' || title.includes('status do post') || title.includes('aprovacao')) colMap.status = c.id;
-        else if (title.includes('legenda') || title.includes('copy') || title.includes('texto final')) colMap.legenda = c.id;
-        else if (title.includes('roteiro') || title.includes('script') || title.includes('video')) colMap.roteiro = c.id;
-        else if (title.includes('plataforma') || title.includes('rede') || title.includes('midia')) colMap.plataformas = c.id;
-        else if (title.includes('tipo') || title.includes('formato') || title.includes('linha editorial')) colMap.tipoDePost = c.id;
-        else if (title.includes('desenvolvimento') || title.includes('etapa') || title.includes('fase') || title.includes('status da arte')) colMap.desenvolvimento = c.id;
-        else if (title.includes('revisao') || title.includes('alteracao') || title.includes('feedback')) colMap.revisao = c.id;
-        else if (title.includes('arquivo') || title.includes('arte') || title.includes('postagem') || type === 'file') colMap.postagem = c.id;
+        } else if (title === 'status' || title.includes('status do post') || title.includes('aprovacao')) {
+            colMap.status = c.id;
+        } else if (title.includes('legenda') || title.includes('copy') || title.includes('texto final')) {
+            colMap.legenda = c.id;
+        } else if (title.includes('roteiro') || title.includes('script') || title.includes('video')) {
+            colMap.roteiro = c.id;
+        } else if (title.includes('plataforma') || title.includes('rede') || title.includes('midia')) {
+            colMap.plataformas = c.id;
+        } else if (title.includes('tipo') || title.includes('formato') || title.includes('linha editorial')) {
+            colMap.tipoDePost = c.id;
+        } else if (title.includes('desenvolvimento') || title.includes('etapa') || title.includes('fase') || title.includes('status da arte')) {
+            colMap.desenvolvimento = c.id;
+        } else if (title.includes('revisao') || title.includes('alteracao') || title.includes('feedback')) {
+            if (type === 'file') colMap.revisaoFiles = c.id;
+            else colMap.revisao = c.id;
+        } else if (type === 'file') {
+            // Prioridade para postagem: exato > contém 'postagem' > contém 'arte' > contém 'arquivo' > genérico
+            let p = 1;
+            if (title === 'postagem') p = 5;
+            else if (title.includes('postagem')) p = 4;
+            else if (title.includes('arte')) p = 3;
+            else if (title.includes('arquivo')) p = 2;
+
+            if (p > postagemPriority) {
+                colMap.postagem = c.id;
+                postagemPriority = p;
+            }
+        }
     }
+    
     if (!colMap.status) colMap.status = boardColumns.find(c => c.type === 'status')?.id;
+    
+    // Fallback para revisaoFiles: se tem mais de uma coluna de arquivo e ainda não achamos revisaoFiles pelo nome
+    if (!colMap.revisaoFiles) {
+        const fileCols = boardColumns.filter(c => c.type === 'file');
+        if (fileCols.length > 1) {
+            const extra = fileCols.find(c => c.id !== colMap.postagem);
+            if (extra) colMap.revisaoFiles = extra.id;
+        }
+    }
+
     return colMap;
 };
 
@@ -42,12 +75,21 @@ function mapBoardItems(board, boardMeta, cols) {
             tipoDePost: '',
             desenvolvimento: '',
             postagem: [],
+            revisaoFiles: [],
+            alteracoesSolicitadas: '',
             dataPostagem: null,
         };
+
+        let firstFileFound = null;
 
         item.column_values.forEach(cv => {
             const val = parseColumnValue(cv, item.assets);
             if (!val) return;
+
+            // Guardar o primeiro campo de arquivo que não está vazio como fallback
+            if (cv.type === 'file' && Array.isArray(val) && val.length > 0 && !firstFileFound) {
+                firstFileFound = val;
+            }
 
             if (cv.id === cols.date) {
                 if (typeof val === 'string') {
@@ -74,7 +116,7 @@ function mapBoardItems(board, boardMeta, cols) {
                     post.plataformas = val.split(',').map(s => s.trim());
                 }
             } else if (cv.id === cols.postagem) {
-                if (Array.isArray(val)) {
+                if (Array.isArray(val) && val.length > 0) {
                     post.postagem = val;
                     try {
                         const cached = localStorage.getItem(`post_img_order_${item.id}`);
@@ -90,8 +132,22 @@ function mapBoardItems(board, boardMeta, cols) {
                         }
                     } catch (e) { }
                 }
+            } else if (cv.id === cols.revisaoFiles) {
+                if (Array.isArray(val)) {
+                    post.revisaoFiles = val;
+                }
+            } else if (cv.id === cols.revisao) {
+                if (typeof val === 'string' && val.trim()) {
+                    post.alteracoesSolicitadas = val;
+                }
             }
         });
+
+        // Fallback de Último Recurso: Se a coluna de postagem mapeada está vazia, 
+        // mas achamos arquivos em outra coluna, usamos esses arquivos.
+        if (post.postagem.length === 0 && firstFileFound) {
+            post.postagem = firstFileFound;
+        }
 
         return post;
     });
@@ -120,6 +176,9 @@ async function fetchOneBoard(boardMeta, apiToken) {
     if (!board) return { posts: [], colMap: {} };
 
     const cols = identifyColumns(board.columns);
+    // LOG DE DIAGNOSTICO: Ajuda a entender por que colunas falham em alguns boards
+    console.log(`[DIAGNOSTICO] Board: ${boardMeta.name} | Mapeamento Identificado:`, cols);
+    
     const posts = mapBoardItems(board, boardMeta, cols);
     return { posts, colMap: cols, rawColumns: board.columns };
 }
