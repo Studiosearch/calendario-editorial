@@ -459,3 +459,4 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
         </>
     );
 }
+
