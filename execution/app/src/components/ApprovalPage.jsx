@@ -447,13 +447,13 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
             <div style={{
                 position: 'fixed', bottom: '10px', right: '10px', 
                 fontSize: '12px', color: '#fff', fontWeight: 900, 
-                pointerEvents: 'none', zIndex: 9999, background: '#f97316',
+                pointerEvents: 'none', zIndex: 9999, background: '#B5A8FF',
                 padding: '4px 10px', borderRadius: '8px', 
-                boxShadow: '0 4px 12px rgba(249,115,22,0.4)',
+                boxShadow: '0 4px 12px rgba(181,168,255,0.4)',
                 border: '2px solid white',
                 textTransform: 'uppercase', letterSpacing: '0.5px'
             }}>
-                Versão: v1.2 (Sincronizado)
+                Versão: v1.3 (DEPLOY_TEST_1)
             </div>
         </>
     );
