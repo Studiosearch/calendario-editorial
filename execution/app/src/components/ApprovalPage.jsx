@@ -215,6 +215,7 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
                 </div>
             </div>
         );
+    }
     // Se estiver no modo Wizard
     if (wizardIndex >= 0 && wizardPosts[wizardIndex]) {
         const currentPost = wizardPosts[wizardIndex];
