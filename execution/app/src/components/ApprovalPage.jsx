@@ -454,7 +454,7 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
                 border: '2px solid white',
                 textTransform: 'uppercase', letterSpacing: '0.5px'
             }}>
-                Versão: v1.3 (DEPLOY_TEST_1)
+                Versão: v1.4 (DEPLOY_TEST_2)
             </div>
         </>
     );
