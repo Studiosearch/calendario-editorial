@@ -160,7 +160,7 @@ async function fetchOneBoard(boardMeta, apiToken) {
         boards(ids: $boardId) {
           name
           columns { id title type }
-          items_page(limit: 500) {
+          items_page(limit: 200) {
             items {
               id
               name
