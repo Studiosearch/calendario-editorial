@@ -317,7 +317,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                         return null;
                                     })()}
                              </div>
-            )}
+            ) : null}
             {/* Center Play Video Indicator */}
                                 {post.postagem?.[0] && isVideoFile(post.postagem[0]) && (
                                     <div style={{
