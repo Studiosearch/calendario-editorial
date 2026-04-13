@@ -21,7 +21,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
     const statusIconSize = useBreakpointValue({ base: 10, md: 18 });
 
     const [filterMonth, setFilterMonth] = useState('all');
-    const [visibleMonthLimit, setVisibleMonthLimit] = useState(3);
+    const [visibleMonthLimit, setVisibleMonthLimit] = useState(12);
 
     const [revisaoPost, setRevisaoPost] = useState(null);
     const [revisaoIdx, setRevisaoIdx] = useState(0);
