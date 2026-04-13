@@ -316,9 +316,10 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                         }
                                         return null;
                                     })()}
-                                </div>
-
-                                {/* Center Play Video Indicator */}
+                               </div>
+                )}
+                    
+                {/* Center Play Video Indicator */}
                                 {post.postagem?.[0] && isVideoFile(post.postagem[0]) && (
                                     <div style={{
                                         position: 'absolute', top: '50%', left: '50%',
