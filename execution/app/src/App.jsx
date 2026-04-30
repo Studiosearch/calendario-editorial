@@ -64,6 +64,14 @@ export default function App() {
         boardName: currentBoard ? currentBoard.name : 'Todos os Clientes'
     }), [metadata, currentBoard]);
 
+    useEffect(() => {
+        if (displayMetadata.boardName && displayMetadata.boardName !== 'Todos os Clientes') {
+            document.title = `Calendário Editorial - ${displayMetadata.boardName}`;
+        } else {
+            document.title = 'Calendário Editorial';
+        }
+    }, [displayMetadata.boardName]);
+
     const isApprovalSlug = !!currentSlug;
 
     useEffect(() => {
