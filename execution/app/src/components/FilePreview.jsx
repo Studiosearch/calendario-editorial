@@ -55,6 +55,7 @@ export default function FilePreview({ file, height = '100%', objectFit = 'cover'
                 alt={file.name || 'Preview'}
                 style={{ width: '100%', height: '100%', objectFit }}
                 loading="lazy"
+                decoding="async"
                 draggable={false}
             />
         </div>
