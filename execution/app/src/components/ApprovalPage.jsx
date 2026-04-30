@@ -86,6 +86,8 @@ function ComparisonContent({ post }) {
 }
 
 export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRevision }) {
+    const activePosts = posts.filter(p => normalizeStatus(p.status) !== 'NAO INICIADO');
+
     const [previewPost, setPreviewPost] = useState(null);
     const [showWelcome, setShowWelcome] = useState(false);
     const [wizardPosts, setWizardPosts] = useState([]);
@@ -95,7 +97,7 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
 
     // Identificar posts pendentes
     const getPendingPosts = () => {
-        return posts
+        return activePosts
             .filter(p => {
                 const s = normalizeStatus(p.status);
                 // Busca por qualquer variação de "EM APROVAÇÃO" ou "REVISADO" ou "REVISÃO" ou "AGUARDANDO"
@@ -112,7 +114,7 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
 
     // Ao carregar, verifica se tem pendências para mostrar o Welcome
     useEffect(() => {
-        if (posts.length > 0) {
+        if (activePosts.length > 0) {
             const pending = getPendingPosts();
             if (pending.length > 0) {
                 // Só mostra o welcome se o wizard não estiver ativo e não estivermos vendo um post já
@@ -124,7 +126,7 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
                 }
             }
         }
-    }, [posts]); // Re-calcula se a lista de posts mudar (raso)
+    }, [activePosts]); // Re-calcula se a lista de posts mudar (raso)
 
     // Restaurar scroll ao fechar o post
     useEffect(() => {
@@ -281,7 +283,7 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
     return (
         <>
             <ApprovalGridView
-                posts={posts}
+                posts={activePosts}
                 metadata={metadata}
                 onPostClick={handleOpenPost}
                 onBack={onBack}
