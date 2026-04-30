@@ -31,15 +31,17 @@ export default function FilePreview({ file, height = '100%', objectFit = 'cover'
     }
 
     if (isVideo) {
+        const videoUrl = url.includes('#t=') ? url : url + '#t=0.001';
         return (
             <div style={containerStyle}>
                 <video
-                    src={url}
+                    src={videoUrl}
                     style={{ width: '100%', height: '100%', objectFit }}
                     muted
                     autoPlay={!disableViewer}
                     loop
                     playsInline
+                    preload="metadata"
                     controls={!disableViewer}
                 />
             </div>
