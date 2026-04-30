@@ -303,18 +303,28 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                                 })()}
 
                                                 {/* Center Play Video Indicator */}
-                                                {hasVideo && (
-                                                    <div style={{
-                                                        position: 'absolute', top: '50%', left: '50%',
-                                                        transform: 'translate(-50%, -50%)',
-                                                        background: 'rgba(0,0,0,0.5)', padding: '12px',
-                                                        borderRadius: '50%', color: 'white', backdropFilter: 'blur(4px)',
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        zIndex: 10, pointerEvents: 'none', border: '2px solid rgba(255,255,255,0.7)'
-                                                    }}>
-                                                        <PlayCircle size={32} />
-                                                    </div>
-                                                )}
+                                                {(() => {
+                                                    const statusUpper = normalizeStatus(post.status);
+                                                    const isRevised = statusUpper.includes('REVISADO') || statusUpper.includes('AG. APROVACAO');
+                                                    const fileList = (isRevised && post.revisaoFiles?.length > 0) ? post.revisaoFiles : post.postagem;
+                                                    const hasVideo = fileList?.some(isVideoFile);
+                                                    
+                                                    if (hasVideo) {
+                                                        return (
+                                                            <div style={{
+                                                                position: 'absolute', top: '50%', left: '50%',
+                                                                transform: 'translate(-50%, -50%)',
+                                                                background: 'rgba(0,0,0,0.5)', padding: '12px',
+                                                                borderRadius: '50%', color: 'white', backdropFilter: 'blur(4px)',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                zIndex: 10, pointerEvents: 'none', border: '2px solid rgba(255,255,255,0.7)'
+                                                            }}>
+                                                                <PlayCircle size={32} />
+                                                            </div>
+                                                        );
+                                                    }
+                                                    return null;
+                                                })()}
 
                                                 {/* Máscara de Destaque */}
                                                 {(() => {
