@@ -117,8 +117,10 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
             if (pending.length > 0) {
                 // Só mostra o welcome se o wizard não estiver ativo e não estivermos vendo um post já
                 if (wizardIndex === -1 && !previewPost && !showSuccessModal) {
-                    setShowWelcome(true);
-                    setWizardPosts(pending);
+                    if (!sessionStorage.getItem('welcome_dismissed')) {
+                        setShowWelcome(true);
+                        setWizardPosts(pending);
+                    }
                 }
             }
         }
@@ -326,7 +328,10 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
                                 Aprovar agora
                             </button>
                             <button
-                                onClick={() => setShowWelcome(false)}
+                                onClick={() => {
+                                    setShowWelcome(false);
+                                    sessionStorage.setItem('welcome_dismissed', 'true');
+                                }}
                                 style={{
                                     padding: '14px', borderRadius: '14px', border: 'none',
                                     background: 'transparent', color: '#718096',
@@ -445,17 +450,6 @@ export default function ApprovalPage({ posts, metadata, onBack, onApprove, onRev
                     to { opacity: 1; transform: scale(1) translateY(0); }
                 }
             `}</style>
-            <div style={{
-                position: 'fixed', bottom: '10px', right: '10px', 
-                fontSize: '12px', color: '#fff', fontWeight: 900, 
-                pointerEvents: 'none', zIndex: 9999, background: '#B5A8FF',
-                padding: '4px 10px', borderRadius: '8px', 
-                boxShadow: '0 4px 12px rgba(181,168,255,0.4)',
-                border: '2px solid white',
-                textTransform: 'uppercase', letterSpacing: '0.5px'
-            }}>
-                Versão: v1.4 (DEPLOY_TEST_2)
-            </div>
         </>
     );
 }
