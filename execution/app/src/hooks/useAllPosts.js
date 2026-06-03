@@ -4,20 +4,42 @@ import { fetchMondayGraphQL, parseColumnValue, uploadFileToMonday, deleteMondayI
 
 // Mapeamento local para identificar colunas por nome ou tipo.
 const identifyColumns = (boardColumns) => {
-    const colMap = {};
+    const colMap = { statusLabels: {} };
     let postagemPriority = 0;
 
     for (const c of boardColumns) {
         const title = (c.title || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const type = c.type;
 
+        // Identificação de Data
         if (type === 'date' && (title.includes('postagem') || title.includes('publicacao'))) {
             colMap.date = c.id;
         } else if (!colMap.date && (title.includes('data') || type === 'date')) {
             colMap.date = c.id;
-        } else if (title === 'status' || title.includes('status do post') || title.includes('aprovacao')) {
+        } 
+        
+        // Identificação de Status (Prioridade para o principal)
+        else if (title === 'status' || title === 'status do post' || title === 'etapa' || title.includes('aprovacao')) {
             colMap.status = c.id;
-        } else if (title.includes('legenda') || title.includes('copy') || title.includes('texto final')) {
+            // Guardar os labels reais do board para normalização futura
+            if (c.settings_str) {
+                try {
+                    const settings = JSON.parse(c.settings_str);
+                    if (settings.labels) colMap.statusLabels = settings.labels;
+                } catch(e){}
+            }
+        } else if (!colMap.status && type === 'status') {
+            colMap.status = c.id;
+            if (c.settings_str) {
+                try {
+                    const settings = JSON.parse(c.settings_str);
+                    if (settings.labels) colMap.statusLabels = settings.labels;
+                } catch(e){}
+            }
+        }
+        
+        // Outras colunas
+        else if (title.includes('legenda') || title.includes('copy') || title.includes('texto final')) {
             colMap.legenda = c.id;
         } else if (title.includes('roteiro') || title.includes('script') || title.includes('video')) {
             colMap.roteiro = c.id;
@@ -25,13 +47,12 @@ const identifyColumns = (boardColumns) => {
             colMap.plataformas = c.id;
         } else if (title.includes('tipo') || title.includes('formato') || title.includes('linha editorial')) {
             colMap.tipoDePost = c.id;
-        } else if (title.includes('desenvolvimento') || title.includes('etapa') || title.includes('fase') || title.includes('status da arte')) {
+        } else if (title.includes('desenvolvimento') || title.includes('fase') || title.includes('status da arte')) {
             colMap.desenvolvimento = c.id;
         } else if (title.includes('revisao') || title.includes('alteracao') || title.includes('alteracoes') || title.includes('feedback')) {
             if (type === 'file') colMap.revisaoFiles = c.id;
             else colMap.revisao = c.id;
         } else if (type === 'file') {
-            // Prioridade para postagem: exato > contém 'postagem' > contém 'arte' > contém 'arquivo' > genérico
             let p = 1;
             if (title === 'postagem') p = 5;
             else if (title.includes('postagem')) p = 4;
@@ -45,21 +66,44 @@ const identifyColumns = (boardColumns) => {
         }
     }
     
-    if (!colMap.status) colMap.status = boardColumns.find(c => c.type === 'status')?.id;
-    
-    // Fallback para revisaoFiles: se tem mais de uma coluna de arquivo e ainda não achamos revisaoFiles pelo nome
-    if (!colMap.revisaoFiles) {
-        const fileCols = boardColumns.filter(c => c.type === 'file');
-        if (fileCols.length > 1) {
-            const extra = fileCols.find(c => c.id !== colMap.postagem);
-            if (extra) colMap.revisaoFiles = extra.id;
-        }
-    }
-
     return colMap;
 };
 
+// Normaliza um status para encontrar o correspondente exato no board
+const normalizeStatus = (requestedStatus, boardLabels) => {
+    if (!boardLabels || Object.keys(boardLabels).length === 0) return requestedStatus;
+    
+    const target = requestedStatus.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    // Procura match exato nos labels do board
+    for (const id in boardLabels) {
+        const label = boardLabels[id];
+        const normalizedLabel = label.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (normalizedLabel === target) return label;
+    }
+    
+    // Fallbacks comuns
+    if (target === 'concluido' || target === 'finalizado') {
+        const fallback = ['Publicado', 'Concluído', 'Finalizado', 'Done'].find(f => 
+            Object.values(boardLabels).some(l => l.toLowerCase().includes(f.toLowerCase()))
+        );
+        if (fallback) {
+             const realLabel = Object.values(boardLabels).find(l => l.toLowerCase().includes(fallback.toLowerCase()));
+             if (realLabel) return realLabel;
+        }
+    }
+
+    if (target === 'em aprovacao cliente') {
+        const fallback = Object.values(boardLabels).find(l => l.toLowerCase().includes('aprovacao'));
+        if (fallback) return fallback;
+    }
+    
+    return requestedStatus;
+};
+
 function mapBoardItems(board, boardMeta, cols) {
+    if (!board.items_page || !board.items_page.items) return [];
+    
     return board.items_page.items.map(item => {
         const post = {
             id: item.id,
@@ -86,7 +130,6 @@ function mapBoardItems(board, boardMeta, cols) {
             const val = parseColumnValue(cv, item.assets);
             if (!val) return;
 
-            // Guardar o primeiro campo de arquivo que não está vazio como fallback
             if (cv.type === 'file' && Array.isArray(val) && val.length > 0 && !firstFileFound) {
                 firstFileFound = val;
             }
@@ -143,8 +186,6 @@ function mapBoardItems(board, boardMeta, cols) {
             }
         });
 
-        // Fallback de Último Recurso: Se a coluna de postagem mapeada está vazia, 
-        // mas achamos arquivos em outra coluna, usamos esses arquivos.
         if (post.postagem.length === 0 && firstFileFound) {
             post.postagem = firstFileFound;
         }
@@ -159,8 +200,8 @@ async function fetchOneBoard(boardMeta, apiToken) {
       query ($boardId: [ID!]) {
         boards(ids: $boardId) {
           name
-          columns { id title type }
-          items_page(limit: 200) {
+          columns { id title type settings_str }
+          items_page(limit: 100) {
             items {
               id
               name
@@ -176,8 +217,7 @@ async function fetchOneBoard(boardMeta, apiToken) {
     if (!board) return { posts: [], colMap: {} };
 
     const cols = identifyColumns(board.columns);
-    // LOG DE DIAGNOSTICO: Ajuda a entender por que colunas falham em alguns boards
-    console.log(`[DIAGNOSTICO] Board: ${boardMeta.name} | Mapeamento Identificado:`, cols);
+    console.log(`[DIAGNOSTICO] Board: ${boardMeta.name} | Mapeamento:`, cols);
     
     const posts = mapBoardItems(board, boardMeta, cols);
     return { posts, colMap: cols, rawColumns: board.columns };
@@ -187,9 +227,7 @@ export function useAllPosts(apiToken) {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    // colMaps: { [boardId]: colMap }
     const [colMaps, setColMaps] = useState({});
-    // metadata: { boardName: 'Todos os Clientes' }
     const [metadata, setMetadata] = useState({ boardName: 'Todos os Clientes' });
 
     const fetchAll = useCallback(async (isBackground = false) => {
@@ -200,25 +238,25 @@ export function useAllPosts(apiToken) {
         if (!isBackground) setLoading(true);
         setError(null);
         try {
-            const results = await Promise.all(
-                MONDAY_BOARDS.map(b => fetchOneBoard(b, apiToken).catch(err => {
-                    console.error(`Erro ao buscar board ${b.name}:`, err);
-                    return { posts: [], colMap: {} };
-                }))
-            );
-
-            const allPosts = results.flatMap(r => r.posts);
+            const allFetchedPosts = [];
             const newColMaps = {};
-            MONDAY_BOARDS.forEach((b, i) => {
-                newColMaps[b.id] = results[i].colMap;
-            });
+            
+            // BUSCA SEQUENCIAL: Evita erro de complexidade (429)
+            for (const b of MONDAY_BOARDS) {
+                try {
+                    const result = await fetchOneBoard(b, apiToken);
+                    allFetchedPosts.push(...result.posts);
+                    newColMaps[b.id] = result.colMap;
+                } catch (err) {
+                    console.error(`Erro ao buscar board ${b.name}:`, err);
+                    // Continua para o próximo board mesmo se um falhar
+                }
+            }
 
-            setPosts(allPosts);
+            setPosts(allFetchedPosts);
             if (!isBackground) {
                 setColMaps(newColMaps);
-                // Opcional: log para debug de boards específicos
-                const counts = results.map((r, i) => `${MONDAY_BOARDS[i].name}: ${r.posts.length}`);
-                console.log("Posts carregados por board:", counts.join(' | '));
+                console.log("Posts totais carregados:", allFetchedPosts.length);
             }
         } catch (err) {
             console.error('Erro geral ao buscar todos os boards:', err);
@@ -230,11 +268,10 @@ export function useAllPosts(apiToken) {
 
     useEffect(() => {
         fetchAll();
-        const timerId = setInterval(() => fetchAll(true), 60000);
+        const timerId = setInterval(() => fetchAll(true), 120000); // Aumentado para 2 min para ser mais gentil com a API
         return () => clearInterval(timerId);
     }, [fetchAll]);
 
-    // updatePost: precisa saber o boardId do post
     const updatePost = useCallback(async (id, updates) => {
         setPosts(prev => prev.map(p => {
             if (p.id !== id) return p;
@@ -249,33 +286,40 @@ export function useAllPosts(apiToken) {
 
         try {
             const columnValues = {};
-            if (updates.status !== undefined && colMap.status) columnValues[colMap.status] = { label: updates.status };
+            
+            if (updates.status !== undefined && colMap.status) {
+                // NORMALIZAÇÃO DE STATUS: Garante que o label exista no board
+                const finalStatus = normalizeStatus(updates.status, colMap.statusLabels);
+                columnValues[colMap.status] = { label: finalStatus };
+            }
+
             if (updates.legenda !== undefined && colMap.legenda) columnValues[colMap.legenda] = updates.legenda;
             if (updates.roteiro !== undefined && colMap.roteiro) columnValues[colMap.roteiro] = updates.roteiro;
-            if (updates.tipoDePost !== undefined && colMap.tipoDePost) columnValues[colMap.tipoDePost] = { label: updates.tipoDePost };
-            if (updates.desenvolvimento !== undefined && colMap.desenvolvimento) columnValues[colMap.desenvolvimento] = { label: updates.desenvolvimento };
+            
+            if (updates.tipoDePost !== undefined && colMap.tipoDePost) {
+                columnValues[colMap.tipoDePost] = { label: updates.tipoDePost };
+            }
+            
+            if (updates.desenvolvimento !== undefined && colMap.desenvolvimento) {
+                columnValues[colMap.desenvolvimento] = { label: updates.desenvolvimento };
+            }
+            
             if (updates.alteracoesSolicitadas !== undefined) {
                 if (colMap.revisao) columnValues[colMap.revisao] = updates.alteracoesSolicitadas;
                 else if (colMap.roteiro) columnValues[colMap.roteiro] = updates.alteracoesSolicitadas;
             }
+
             if (updates.dataPostagem !== undefined && colMap.date) {
                 if (!updates.dataPostagem) {
                     columnValues[colMap.date] = null;
                 } else {
                     const d = updates.dataPostagem;
-                    if (d instanceof Date) {
-                        const y = d.getFullYear();
-                        const m = String(d.getMonth() + 1).padStart(2, '0');
-                        const day = String(d.getDate()).padStart(2, '0');
+                    const dt = (d instanceof Date) ? d : new Date(d);
+                    if (!isNaN(dt.getTime())) {
+                        const y = dt.getFullYear();
+                        const m = String(dt.getMonth() + 1).padStart(2, '0');
+                        const day = String(dt.getDate()).padStart(2, '0');
                         columnValues[colMap.date] = `${y}-${m}-${day}`;
-                    } else if (typeof d === 'string') {
-                        const dt = new Date(d);
-                        if (!isNaN(dt.getTime())) {
-                            const y = dt.getFullYear();
-                            const m = String(dt.getMonth() + 1).padStart(2, '0');
-                            const day = String(dt.getDate()).padStart(2, '0');
-                            columnValues[colMap.date] = `${y}-${m}-${day}`;
-                        }
                     }
                 }
             }
@@ -367,7 +411,6 @@ export function useAllPosts(apiToken) {
         updatePost(id, { status: 'Revisão', alteracoesSolicitadas: obs });
     }, [updatePost]);
 
-    // createPost: cria no primeiro board por padrão (ou board ativo se necessário)
     const createPost = useCallback(async (name, initialDate, targetBoardId) => {
         const boardMeta = MONDAY_BOARDS.find(b => b.id === targetBoardId) || MONDAY_BOARDS[0];
         const colMap = colMaps[boardMeta.id] || {};
@@ -420,6 +463,7 @@ export function useAllPosts(apiToken) {
         createPost,
         deletePost,
         requestPostRevision,
-        colMap: {}, // compatibilidade — não usado diretamente no modo multi-board
+        colMap: {},
     };
 }
+

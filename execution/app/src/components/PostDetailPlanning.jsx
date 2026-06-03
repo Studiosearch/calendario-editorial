@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, FileText, Share2, User, Layers, Type } from 'lucide-react';
+import { Calendar, FileText, Share2, User, Layers, Type, MessageSquareText } from 'lucide-react';
 import { PLATFORM_OPTIONS, DESENVOLVIMENTO_OPTIONS, TIPO_DE_POST_OPTIONS, STATUS_COLORS } from '../constants';
 
 export default function PostDetailPlanning({

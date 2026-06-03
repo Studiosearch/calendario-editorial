@@ -60,7 +60,7 @@ export default function ApprovalDetailView({ post, metadata, onClose, onApprove,
 
     const statusUpper = normalizeStatus(post.status);
     const isRevised = statusUpper.includes('REVISADO') || statusUpper.includes('AG. APROVACAO');
-    const mediaFiles = (isRevised && post.revisaoFiles?.length > 0) 
+    const mediaFiles = (post.revisaoFiles?.length > 0) 
         ? post.revisaoFiles 
         : post.postagem;
 

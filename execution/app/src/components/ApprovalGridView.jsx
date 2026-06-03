@@ -214,7 +214,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                                 {(() => {
                                                     const statusUpper = normalizeStatus(post.status);
                                                     const isRevised = statusUpper.includes('REVISADO') || statusUpper.includes('AG. APROVACAO');
-                                                    const fileList = (isRevised && post.revisaoFiles?.length > 0) ? post.revisaoFiles : post.postagem;
+                                                    const fileList = (post.revisaoFiles?.length > 0) ? post.revisaoFiles : post.postagem;
                                                     const displayFile = fileList?.length > 0 ? (fileList.find(f => !isVideoFile(f)) || fileList[0]) : null;
                                                     const hasVideo = fileList?.some(isVideoFile);
 
@@ -306,7 +306,7 @@ export default function ApprovalGridView({ posts, metadata, onPostClick, onBack,
                                                 {(() => {
                                                     const statusUpper = normalizeStatus(post.status);
                                                     const isRevised = statusUpper.includes('REVISADO') || statusUpper.includes('AG. APROVACAO');
-                                                    const fileList = (isRevised && post.revisaoFiles?.length > 0) ? post.revisaoFiles : post.postagem;
+                                                    const fileList = (post.revisaoFiles?.length > 0) ? post.revisaoFiles : post.postagem;
                                                     const hasVideo = fileList?.some(isVideoFile);
                                                     
                                                     if (hasVideo) {
