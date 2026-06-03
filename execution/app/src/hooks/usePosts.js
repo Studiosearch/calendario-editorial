@@ -27,7 +27,7 @@ const identifyColumns = (boardColumns) => {
             colMap.tipoDePost = c.id;
         } else if (title.includes('desenvolvimento') || title.includes('etapa') || title.includes('fase') || title.includes('status da arte')) {
             colMap.desenvolvimento = c.id;
-        } else if (title.includes('revisao') || title.includes('alteracao') || title.includes('alteracoes') || title.includes('feedback')) {
+        } else if (title.includes('revisao') || title.includes('revisado') || title.includes('alteracao') || title.includes('alteracoes') || title.includes('feedback')) {
             if (type === 'file') colMap.revisaoFiles = c.id;
             else colMap.revisao = c.id;
         } else if (type === 'file') {
