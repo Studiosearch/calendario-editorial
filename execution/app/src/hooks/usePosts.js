@@ -84,7 +84,7 @@ export function usePosts(apiToken, boardId) {
                     boards(ids: $boardId) {
                       name
                       columns { id title type }
-                      items_page(limit: 100) {
+                      items_page(limit: 500) {
                         items {
                           id
                           name
